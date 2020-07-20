@@ -4,17 +4,21 @@ A highly opinionated MVC micro web-framework for Node.js
 ### Quick Start
 This quick start assume a slight familiarity with Node.js and how to structure a project
 1. Initialize your NPM package
-	`npm init`
-	and fill out the questions
+
+	`npm init`, and fill out the questions
 2. Include simplemvc.js in your project
     1. You can do this through npm ***(not supported currently)***
+    
          `npm install simplemvcjs`
     2. Or by [downloading](#) and including simplemvc.js manually in your project.
 3. Create and/or open app.js
-4. Import SimpleMVC 
-	`import SimpleMVC from 'simplemvcjs'`
+4. Import/Require SimpleMVC
+	
+	`const SimpleMVC = require('simplemvcjs')`
+	
 	or if you downloaded the project
-	`import SimpleMVC from '/path/to/simplemvc.js`
+	
+	`const SimpleMVC = require('/path/to/simplemvc.js')`
 5. Create your first SimpleMVC.Controller
 	```js
 	const HomeController = new SimpleMVC.Controller("/", {

@@ -1,0 +1,33 @@
+{
+  "name": "simplemvcjs",
+  "version": "0.1.0",
+  "description": "A highly opinionated MVC micro web-framework.",
+  "main": "./src/simplemvc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeremyaboyd/simplemvcjs.git"
+  },
+  "keywords": [
+    "mvc",
+    "web-framework"
+  ],
+  "author": "Jeremy Boyd",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/jeremyaboyd/simplemvcjs/issues"
+  },
+  "homepage": "https://github.com/jeremyaboyd/simplemvcjs#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "cookie-parser": "^1.4.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-formidable": "^1.2.0",
+    "express-session": "^1.17.1",
+    "mongoose": "^5.9.25",
+    "mustache-express": "^1.3.0"
+  }
+}

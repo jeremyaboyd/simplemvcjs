@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 
 require('dotenv').config();
 
-class SimpleApp {
+class SimpleMVCApp {
     express;
     __dirname = require('path').resolve();
     constructor() {
@@ -28,7 +28,7 @@ class SimpleApp {
 
     addControllers(...controllers) {
         controllers.forEach(controller => {
-            if (controller instanceof SimpleController) {
+            if (controller instanceof SimpleMVCController) {
                 Object.keys(controller.routes).forEach((v) => {
                     const route = controller.routes[v];
                     const fullPath = controller.basePath + v;
@@ -63,7 +63,7 @@ class SimpleApp {
     }
 }
 
-class SimpleViewResult {
+class SimpleMVCViewResult {
     viewName;
     model;
     status = 200;
@@ -74,7 +74,7 @@ class SimpleViewResult {
     }
 }
 
-class SimpleContentResult {
+class SimpleMVCContentResult {
     content = "";
     status = 200;
     constructor(content, status) {
@@ -83,7 +83,7 @@ class SimpleContentResult {
     }
 }
 
-class SimpleJsonResult {
+class SimpleMVCJsonResult {
     data;
     status = 200;
     constructor(data, status) {
@@ -92,7 +92,7 @@ class SimpleJsonResult {
     }
 }
 
-class SimpleController {
+class SimpleMVCController {
     basePath;
     routes = {};
     constructor(basePath, routes) {
@@ -124,14 +124,14 @@ class SimpleController {
                 if (!result) return;
 
                 res.status(result.status || 200);
-                if (result instanceof SimpleViewResult) {
+                if (result instanceof SimpleMVCViewResult) {
                     const viewPath = (this.basePath + result.viewName).substring(1); //remove slash to make absolute path relative for mustache
                     const vm = {
                         session: req.session,
                         model: result.model
                     };
                     res.render(viewPath, vm);
-                } else if (result instanceof SimpleJsonResult) {
+                } else if (result instanceof SimpleMVCJsonResult) {
                     res.json(result.data);
                 }
             } catch (ex) {
@@ -140,10 +140,10 @@ class SimpleController {
         }
     }
 
-    view = (view, model, status) => new SimpleViewResult(view, model, status);
-    json = (data, status) => new SimpleJsonResult(data, status);
-    content = (content, status) => new SimpleContentResult(content, status);
+    view = (view, model, status) => new SimpleMVCViewResult(view, model, status);
+    json = (data, status) => new SimpleMVCJsonResult(data, status);
+    content = (content, status) => new SimpleMVCContentResult(content, status);
 }
 
-module.exports.App = SimpleApp;
-module.exports.Controller = SimpleController;
+module.exports.App = SimpleMVCApp;
+module.exports.Controller = SimpleMVCController;

@@ -4,7 +4,6 @@
   "description": "A highly opinionated MVC micro web-framework.",
   "main": "./src/simplemvc.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",

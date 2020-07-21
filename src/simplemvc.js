@@ -98,7 +98,7 @@ class SimpleMVCController {
     constructor(basePath, routes) {
         this.basePath = basePath;
         if (routes)
-            addRoutes(routes);
+            this.addRoutes(routes);
     }
 
     addRoutes(routes) {

@@ -7,24 +7,24 @@ This quick start assume a slight familiarity with Node.js and how to structure a
 
 	`npm init`, and fill out the questions
 2. Include simplemvc.js in your project
-    1. You can do this through npm ***(not supported currently)***
+    1. By [downloading](https://raw.githubusercontent.com/jeremyaboyd/simplemvcjs/master/src/simplemvc.js) and including simplemvc.js manually in your project.
+    2. Through npm ***(not supported currently)***
     
          `npm install simplemvcjs`
-    2. Or by [downloading](#) and including simplemvc.js manually in your project.
 3. Create and/or open app.js
 4. Import/Require SimpleMVC
 	
-	`const SimpleMVC = require('simplemvcjs')`
+	`const SimpleMVC = require('simplemvcjs');`
 	
 	or if you downloaded the project
 	
-	`const SimpleMVC = require('/path/to/simplemvc.js')`
+	`const SimpleMVC = require('/path/to/simplemvc.js');`
 5. Create your first SimpleMVC.Controller
 	```js
 	const HomeController = new SimpleMVC.Controller("/", {
-		"": function() {
-			return this.content("Hello, World!");
-		}
+	    "": function() {
+	        return this.content("Hello, World!");
+	    }
 	});
 	```
 6. Create your your SimpleMVC.App
@@ -41,6 +41,7 @@ This quick start assume a slight familiarity with Node.js and how to structure a
 	SESSION_SECRET=\Qvu$-pN84PfeJ>~sW
 
 	#database
+	MONGO_SCHEME=
 	MONGO_USER=
 	MONGO_PASSWORD=
 	MONGO_SERVER=
@@ -66,15 +67,22 @@ These directories would be relative to your `app.js` file and are required for f
 
 ### Routing
 Routing in SimpleMVC is defined by the combination of a base path (the first constructor parameter) and a routes dictionary (the second constructor parameter), and can then be expanded after initialization through the `Controller.addRoutes()` function.
+```js
+const HomeController = new SimpleMVC.Controller("/", {
+    "": function() {
+       return this.view('index');
+    }
+})
+```
 
 Individual routes are defined as such:
 ```js
-{
-	"route/path": function(req, res) {
-		const model = { someProperty: "some value" };
-		return this.view('viewName', model);
-	}
-}
+HomeController.addRoutes({
+   "route/path": function(req, res) {
+        const model = { someProperty: "some value" };
+        return this.view('viewName', model);
+    }
+});
 ```
 In the previous example, if the controller's base path was defined as `"/"`, the route would be `/route/path` and the view file would be located at `./src/views/viewName`.
 ### Views

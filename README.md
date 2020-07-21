@@ -90,6 +90,33 @@ Views are [Mustache(5)](https://mustache.github.io/mustache.5.html) templates. A
 
 All views need the `.mustache` file extension.
 
-### Other Responses
+## A Simple Example
+```js
+const SimpleMVC = require('../libs/simplemvc.js');
+const BlogService = require('./services/BlogService.js');
 
-### Road Map
+const HomeController = new SimpleMVC.Controller("/", {
+    "": async function () {
+        const latestPosts = await BlogService.getPostsDesc(0, 10);
+        let view = {
+            title: "My Website",
+            posts: latestPosts,
+        };
+        return this.view('index', view);
+    },
+    "post/:id": async function (req) {
+        const post = await BlogService.getPost(req.params.id);
+        return this.view('single', post);
+    },
+    "about": function () {
+        return this.view('about', { title: "About Me" });
+    }
+});
+
+const app = new SimpleMVC.App();
+app.initDbConnection();
+app.addControllers(HomeController);
+app.listen();
+```
+
+## Road Map

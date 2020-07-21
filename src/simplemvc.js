@@ -74,6 +74,15 @@ class SimpleViewResult {
     }
 }
 
+class SimpleContentResult {
+    content = "";
+    status = 200;
+    constructor(content, status) {
+        this.content = content;
+        this.status = status || 200;
+    }
+}
+
 class SimpleJsonResult {
     data;
     status = 200;
@@ -133,6 +142,7 @@ class SimpleController {
 
     view = (view, model, status) => new SimpleViewResult(view, model, status);
     json = (data, status) => new SimpleJsonResult(data, status);
+    content = (content, status) => new SimpleContentResult(content, status);
 }
 
 module.exports.App = SimpleApp;

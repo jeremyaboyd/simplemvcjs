@@ -4,6 +4,7 @@ const formidable = require('express-formidable');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 require('dotenv').config();
 
@@ -98,7 +99,7 @@ class SimpleMVCController {
     constructor(basePath, routes) {
         this.basePath = basePath;
         if (routes)
-            addRoutes(routes);
+            this.addRoutes(routes);
     }
 
     addRoutes(routes) {
@@ -145,5 +146,45 @@ class SimpleMVCController {
     content = (content, status) => new SimpleMVCContentResult(content, status);
 }
 
+class SimpleMVCUser {
+    _id;
+    email;
+    password;
+    profile = {};
+}
+
+class SimpleMVCMembership {
+    constructor() {
+        this.userModel = new mongoose.model('simple_user', {
+            email: String,
+            password: String,
+            created_on: { type: Date, default: Date.now },
+            profile: [{ name: String, value: String, created_on: { type: Date, default: Date.now } }]
+        });
+
+        this.convertUser = function (model) {
+            const convertedUser = new SimpleMVCUser();
+            model.profile.forEach(profilePart => {
+                convertedUser.profile[profilePart.name] = profilePart.value;
+            });
+
+        };
+    }
+
+    addUser(email, password, profile) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new this.userModel({
+            email,
+            password: hashedPassword,
+            profile: Object.keys(profile).map(k => {
+                return { name: k, value: profile[k] }
+            })
+        });
+
+        newUser.save();
+    }
+}
+
 module.exports.App = SimpleMVCApp;
 module.exports.Controller = SimpleMVCController;
+module.exports.Membership = SimpleMVCMembership;

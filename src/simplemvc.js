@@ -93,6 +93,13 @@ class SimpleMVCJsonResult {
     }
 }
 
+class SimpleMVCRedirectResult {
+    url;
+    constructor(url) {
+        this.url = url;
+    }
+}
+
 class SimpleMVCController {
     basePath;
     routes = {};
@@ -135,6 +142,10 @@ class SimpleMVCController {
                     res.render(viewPath, vm);
                 } else if (result instanceof SimpleMVCJsonResult) {
                     res.json(result.data);
+                } else if (result instanceof SimpleMVCContentResult) {
+                    res.send(result.content);
+                } else if (result instanceof SimpleMVCRedirectResult) {
+                    res.redirect(result.url);
                 }
             } catch (ex) {
                 res.status(500).send(ex);
@@ -145,6 +156,7 @@ class SimpleMVCController {
     view = (view, model, status) => new SimpleMVCViewResult(view, model, status);
     json = (data, status) => new SimpleMVCJsonResult(data, status);
     content = (content, status) => new SimpleMVCContentResult(content, status);
+    redirect = (url) => new SimpleMVCRedirectResult(url);
 }
 
 class SimpleMVCUser {

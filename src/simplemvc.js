@@ -176,7 +176,7 @@ class SimpleMVCMembership {
             email: String,
             password: String,
             created_on: { type: Date, default: Date.now },
-            profile: [{ name: String, value: String, created_on: { type: Date, default: Date.now } }]
+            profile: { type: Map, of: String }
         });
 
         this.convertUser = function (model) {
@@ -192,10 +192,8 @@ class SimpleMVCMembership {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new this.userModel({
             email,
-            password: hashedPassword,
-            profile: Object.keys(profile).map(k => {
-                return { name: k, value: profile[k] }
-            })
+            profile,
+            password: hashedPassword
         });
 
         return this.convertUser(await newUser.save());
@@ -214,14 +212,11 @@ class SimpleMVCMembership {
         return this.convertUser(await user.save());
     }
 
-    async updateUserProfile(id, profile) {
+    async updateUserProfile(id, profileObject) {
         const user = await this.userModel.findById(id);
-        user.profile.push(Object.keys(profile).map((k) => {
-            return {
-                name: k,
-                value: profile[k]
-            }
-        }));
+        for (const key of Object.keys(profileObject)) {
+            user.profile.set(key, profileObject[key]);
+        }
     }
 
     async validateUser(email, password) {

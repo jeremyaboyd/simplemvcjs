@@ -34,7 +34,7 @@ class SimpleMVCApp {
                     const route = controller.routes[v];
                     const fullPath = controller.basePath + v;
                     if (typeof route === "function") {
-                        this.express.get(fullPath, route);
+                        this.express.all(fullPath, route);
                     } else {
                         if (route["get"])
                             this.express.get(fullPath, route.get);
@@ -126,7 +126,8 @@ class SimpleMVCController {
 
                 res.status(result.status || 200);
                 if (result instanceof SimpleMVCViewResult) {
-                    const viewPath = (this.basePath + result.viewName).substring(1); //remove slash to make absolute path relative for mustache
+                    //remove slash to make absolute path relative for mustache
+                    const viewPath = (this.basePath + result.viewName).substring(1);
                     const vm = {
                         session: req.session,
                         model: result.model
@@ -147,10 +148,13 @@ class SimpleMVCController {
 }
 
 class SimpleMVCUser {
-    _id;
+    id;
     email;
-    password;
     profile = {};
+    constructor(id, email) {
+        this.id = id;
+        this.email = email;
+    }
 }
 
 class SimpleMVCMembership {
@@ -163,7 +167,7 @@ class SimpleMVCMembership {
         });
 
         this.convertUser = function (model) {
-            const convertedUser = new SimpleMVCUser();
+            const convertedUser = new SimpleMVCUser(model._id, model.email);
             model.profile.forEach(profilePart => {
                 convertedUser.profile[profilePart.name] = profilePart.value;
             });
@@ -171,7 +175,7 @@ class SimpleMVCMembership {
         };
     }
 
-    addUser(email, password, profile) {
+    async addUser(email, password, profile) {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new this.userModel({
             email,
@@ -181,7 +185,45 @@ class SimpleMVCMembership {
             })
         });
 
-        newUser.save();
+        return this.convertUser(await newUser.save());
+    }
+
+    async updateUserEmail(id, email) {
+        const user = await this.userModel.findById(id);
+        user.email = email;
+        return this.convertUser(await user.save());
+    }
+
+    async updateUserPassword(id, password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await this.userModel.findById(id);
+        user.password = hashedPassword;
+        return this.convertUser(await user.save());
+    }
+
+    async updateUserProfile(id, profile) {
+        const user = await this.userModel.findById(id);
+        user.profile.push(Object.keys(profile).map((k) => {
+            return {
+                name: k,
+                value: profile[k]
+            }
+        }));
+    }
+
+    async validateUser(email, password) {
+        const user = await this.userModel.findOne({ email });
+        if (await bcrypt.compare(password, user.password))
+            return this.convertUser(user);
+    }
+
+    async getUser(id) {
+        const user = await this.userModel.findById(id);
+        return this.convertUser(user);
+    }
+
+    async deleteuser(id) {
+        await this.userModel.findByIdAndDelete(id);
     }
 }
 

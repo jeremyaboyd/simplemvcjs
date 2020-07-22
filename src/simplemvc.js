@@ -4,6 +4,8 @@ const formidable = require('express-formidable');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const MongoStore = require('connect-mongo')(session);
 
 require('dotenv').config();
 
@@ -15,7 +17,6 @@ class SimpleMVCApp {
 
         this.express.use(formidable());
         this.express.use(cookieParser());
-        this.express.use(session({ secret: process.env.SESSION_SECRET }));
 
         this.express.engine('mustache', mustache());
         this.express.set('view engine', 'mustache');
@@ -33,7 +34,7 @@ class SimpleMVCApp {
                     const route = controller.routes[v];
                     const fullPath = controller.basePath + v;
                     if (typeof route === "function") {
-                        this.express.get(fullPath, route);
+                        this.express.all(fullPath, route);
                     } else {
                         if (route["get"])
                             this.express.get(fullPath, route.get);
@@ -46,7 +47,18 @@ class SimpleMVCApp {
         });
     }
 
+    intiSessions() {
+        var sessionOptions = {
+            secret: process.env.SESSION_SECRET
+        };
+        if(this.useMongoose)
+            sessionOptions.store = new MongoStore({ mongooseConnection: mongoose.connection, collection: 'simple_sessions' });
+
+        this.express.use(session(sessionOptions));
+    }
+
     initDbConnection() {
+        this.useMongoose = true;
         const {
             MONGO_SCHEME,
             MONGO_USER,
@@ -92,6 +104,13 @@ class SimpleMVCJsonResult {
     }
 }
 
+class SimpleMVCRedirectResult {
+    url;
+    constructor(url) {
+        this.url = url;
+    }
+}
+
 class SimpleMVCController {
     basePath;
     routes = {};
@@ -107,6 +126,7 @@ class SimpleMVCController {
             if (typeof route === "function") {
                 this.routes[v] = this.requestHandler(route);
             } else {
+                this.routes[v] = {};
                 if (route["get"])
                     this.routes[v].get = this.requestHandler(route.get);
 
@@ -125,7 +145,8 @@ class SimpleMVCController {
 
                 res.status(result.status || 200);
                 if (result instanceof SimpleMVCViewResult) {
-                    const viewPath = (this.basePath + result.viewName).substring(1); //remove slash to make absolute path relative for mustache
+                    //remove slash to make absolute path relative for mustache
+                    const viewPath = (this.basePath + result.viewName).substring(1);
                     const vm = {
                         session: req.session,
                         model: result.model
@@ -133,6 +154,10 @@ class SimpleMVCController {
                     res.render(viewPath, vm);
                 } else if (result instanceof SimpleMVCJsonResult) {
                     res.json(result.data);
+                } else if (result instanceof SimpleMVCContentResult) {
+                    res.send(result.content);
+                } else if (result instanceof SimpleMVCRedirectResult) {
+                    res.redirect(result.url);
                 }
             } catch (ex) {
                 res.status(500).send(ex);
@@ -143,7 +168,86 @@ class SimpleMVCController {
     view = (view, model, status) => new SimpleMVCViewResult(view, model, status);
     json = (data, status) => new SimpleMVCJsonResult(data, status);
     content = (content, status) => new SimpleMVCContentResult(content, status);
+    redirect = (url) => new SimpleMVCRedirectResult(url);
+}
+
+class SimpleMVCUser {
+    id;
+    email;
+    profile = {};
+    constructor(id, email) {
+        this.id = id;
+        this.email = email;
+    }
+}
+
+class SimpleMVCMembership {
+    constructor() {
+        this.userModel = new mongoose.model('simple_user', {
+            email: String,
+            password: String,
+            created_on: { type: Date, default: Date.now },
+            profile: { type: Map, of: String }
+        });
+
+        this.convertUser = function (model) {
+            if (!model) return;
+            const convertedUser = new SimpleMVCUser(model._id, model.email);
+            for (const key of model.profile.keys()) {
+                convertedUser.profile[key] = model.profile.get(key);
+            }
+            return convertedUser;
+        };
+    }
+
+    async addUser(email, password, profile) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new this.userModel({
+            email,
+            profile,
+            password: hashedPassword
+        });
+
+        return this.convertUser(await newUser.save());
+    }
+
+    async updateUserEmail(id, email) {
+        const user = await this.userModel.findById(id);
+        user.email = email;
+        return this.convertUser(await user.save());
+    }
+
+    async updateUserPassword(id, password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await this.userModel.findById(id);
+        user.password = hashedPassword;
+        return this.convertUser(await user.save());
+    }
+
+    async updateUserProfile(id, profileObject) {
+        const user = await this.userModel.findById(id);
+        for (const key of Object.keys(profileObject)) {
+            user.profile.set(key, profileObject[key]);
+        }
+        return this.convertUser(await user.save());
+    }
+
+    async validateUser(email, password) {
+        const user = await this.userModel.findOne({ email });
+        if (await bcrypt.compare(password, user.password))
+            return this.convertUser(user);
+    }
+
+    async getUser(id) {
+        const user = await this.userModel.findById(id);
+        return this.convertUser(user);
+    }
+
+    async deleteuser(id) {
+        await this.userModel.findByIdAndDelete(id);
+    }
 }
 
 module.exports.App = SimpleMVCApp;
 module.exports.Controller = SimpleMVCController;
+module.exports.Membership = SimpleMVCMembership;

@@ -47,7 +47,7 @@ class SimpleMVCApp {
         });
     }
 
-    intiSessions() {
+    initSessions() {
         var sessionOptions = {
             secret: process.env.SESSION_SECRET
         };

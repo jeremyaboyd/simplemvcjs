@@ -115,6 +115,7 @@ class SimpleMVCController {
             if (typeof route === "function") {
                 this.routes[v] = this.requestHandler(route);
             } else {
+                this.routes[v] = {};
                 if (route["get"])
                     this.routes[v].get = this.requestHandler(route.get);
 
@@ -183,7 +184,7 @@ class SimpleMVCMembership {
             model.profile.forEach(profilePart => {
                 convertedUser.profile[profilePart.name] = profilePart.value;
             });
-
+            return convertedUser;
         };
     }
 

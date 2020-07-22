@@ -180,10 +180,11 @@ class SimpleMVCMembership {
         });
 
         this.convertUser = function (model) {
+            if (!model) return;
             const convertedUser = new SimpleMVCUser(model._id, model.email);
-            model.profile.forEach(profilePart => {
-                convertedUser.profile[profilePart.name] = profilePart.value;
-            });
+            for (const key of model.profile.keys()) {
+                convertedUser.profile[key] = model.profile.get(key);
+            }
             return convertedUser;
         };
     }
@@ -217,6 +218,7 @@ class SimpleMVCMembership {
         for (const key of Object.keys(profileObject)) {
             user.profile.set(key, profileObject[key]);
         }
+        return this.convertUser(await user.save());
     }
 
     async validateUser(email, password) {

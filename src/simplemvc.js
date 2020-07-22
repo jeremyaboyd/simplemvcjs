@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const MongoStore = require('connect-mongo')(session);
 
 require('dotenv').config();
 
@@ -16,7 +17,6 @@ class SimpleMVCApp {
 
         this.express.use(formidable());
         this.express.use(cookieParser());
-        this.express.use(session({ secret: process.env.SESSION_SECRET }));
 
         this.express.engine('mustache', mustache());
         this.express.set('view engine', 'mustache');
@@ -47,7 +47,18 @@ class SimpleMVCApp {
         });
     }
 
+    intiSessions() {
+        var sessionOptions = {
+            secret: process.env.SESSION_SECRET
+        };
+        if(this.useMongoose)
+            sessionOptions.store = new MongoStore({ mongooseConnection: mongoose.connection, collection: 'simple_sessions' });
+
+        this.express.use(session(sessionOptions));
+    }
+
     initDbConnection() {
+        this.useMongoose = true;
         const {
             MONGO_SCHEME,
             MONGO_USER,

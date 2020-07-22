@@ -3,8 +3,7 @@
   "version": "0.1.0",
   "description": "A highly opinionated MVC micro web-framework.",
   "main": "./src/simplemvc.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jeremyaboyd/simplemvcjs.git"
@@ -21,6 +20,7 @@
   "homepage": "https://github.com/jeremyaboyd/simplemvcjs#readme",
   "dependencies": {
     "bcrypt": "^5.0.0",
+    "connect-mongo": "^3.2.0",
     "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",

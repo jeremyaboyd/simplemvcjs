@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const mustache = require('mustache');
 
 class SimpleMVCSMTP {
     constructor() {
@@ -12,4 +13,16 @@ class SimpleMVCSMTP {
             },
         });
     }
+
+    sendMail(from, to, subject, template, data) {
+        const body = mustache.render(template, data);
+        return this.transporter.sendMail({
+            from,
+            to,
+            subject,
+            html: body
+        });
+    }
 }
+
+module.exports = SimpleMVCSMTP;

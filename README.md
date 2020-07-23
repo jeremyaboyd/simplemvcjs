@@ -49,9 +49,10 @@ This quick start assume a slight familiarity with Node.js and how to structure a
 
 	#smtp
 	SMTP_USER=
-	SMTP_PASSWORD=
-	SMTP_SERVER=
+	SMTP_PASS=
+	SMTP_HOST=
 	SMTP_PORT=
+	SMTP_SECURE=
 	```
 8. Run it via `node ./app.js`
 

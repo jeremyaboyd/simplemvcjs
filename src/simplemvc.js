@@ -8,4 +8,4 @@ const SimpleMVCSMTP = require('./simplemvc.smtp.js');
 module.exports.App = SimpleMVCApp;
 module.exports.Controller = SimpleMVCController;
 module.exports.Membership = SimpleMVCMembership;
-module.exports.SimpleMVCSMTP = SimpleMVCSMTP;
+module.exports.SMTP = SimpleMVCSMTP;

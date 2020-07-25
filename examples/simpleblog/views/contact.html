@@ -7,38 +7,39 @@
 
 <body>
     {{> shared/nav}}
-    <div class="container">
+    <div class="container" style="margin-top: 80px">
         <div class="row">
             <div class="col-md-10 col-lg-8 mx-auto">
-                <p>Want to get in touch? Fill out the form below to send me a message and I will get back to you as soon
-                    as possible!</p>
-                <form id="contactForm" name="sentMessage" novalidate="novalidate">
+                {{#model.message}}<div class="alert alert-{{type}}">{{message}}</div>{{/model.message}}
+                <p>Want to get in touch? Fill out the form below to send me a message, and I will get back to you as
+                    soon as possible!</p>
+                <form method="post" action="/contact" enctype="application/x-www-form-urlencoded">
                     <div class="control-group">
-                        <div class="form-group floating-label-form-group controls"><label>Name</label><input
-                                class="form-control" type="text" id="name" required placeholder="Name" /><small
-                                class="form-text text-danger help-block"></small></div>
-                    </div>
-                    <div class="control-group">
-                        <div class="form-group floating-label-form-group controls"><label>Email Address</label><input
-                                class="form-control" type="email" id="email" required
-                                placeholder="Email Address" /><small class="form-text text-danger help-block"></small>
+                        <div class="form-group floating-label-form-group controls">
+                            <label>Name</label>
+                            <input class="form-control" type="text" name="name" required placeholder="Name" />
                         </div>
                     </div>
                     <div class="control-group">
-                        <div class="form-group floating-label-form-group controls"><label>Phone Number</label><input
-                                class="form-control" type="tel" id="phone" required placeholder="Phone Number" /><small
-                                class="form-text text-danger help-block"></small></div>
+                        <div class="form-group floating-label-form-group controls">
+                            <label>Email Address</label>
+                            <input class="form-control" type="email" name="email" required placeholder="Email" />
+                        </div>
                     </div>
                     <div class="control-group">
-                        <div class="form-group floating-label-form-group controls mb-3"><label>Message</label><textarea
-                                class="form-control" id="message"
-                                data-validation-required-message="Please enter a message." required
-                                placeholder="Message" rows="5"></textarea><small
-                                class="form-text text-danger help-block"></small></div>
+                        <div class="form-group floating-label-form-group controls">
+                            <label>Phone Number</label>
+                            <input class="form-control" type="tel" name="phone" required placeholder="Phone" />
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group floating-label-form-group controls mb-3">
+                            <label>Message</label>
+                            <textarea class="form-control" name="message" required placeholder="Message" rows="5"></textarea>
+                        </div>
                     </div>
                     <div id="success"></div>
-                    <div class="form-group"><button class="btn btn-primary" id="sendMessageButton"
-                            type="submit">Send</button></div>
+                    <div class="form-group"><button class="btn btn-primary" type="submit">Send</button></div>
                 </form>
             </div>
         </div>

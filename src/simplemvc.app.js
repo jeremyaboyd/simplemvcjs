@@ -44,7 +44,7 @@ class SimpleMVCApp {
 
     initStaticFiles(path) {
         const staticPath = this.__dirname + path;
-        this.express.get('*', function(req, res) {
+        this.express.get('*', function (req, res) {
             res.sendFile(staticPath + req.path);
         });
     }
@@ -53,7 +53,7 @@ class SimpleMVCApp {
         var sessionOptions = {
             secret: process.env.SESSION_SECRET
         };
-        if(this.useMongoose)
+        if (this.useMongoose)
             sessionOptions.store = new MongoStore({ mongooseConnection: mongoose.connection, collection: 'simple_sessions' });
 
         this.express.use(session(sessionOptions));
@@ -73,7 +73,12 @@ class SimpleMVCApp {
     }
 
     listen(host, port) {
-        this.express.listen(parseInt(port || process.env.PORT), host || process.env.HOST);
+        try {
+            this.express.listen(parseInt(port || process.env.PORT), host || process.env.HOST);
+            console.log(`SimpleMVC.App is listening on ${host || process.env.HOST} port ${port || process.env.PORT}`);
+        } catch (ex) {
+            console.error(ex);
+        }
     }
 }
 

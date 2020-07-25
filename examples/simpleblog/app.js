@@ -60,8 +60,12 @@ const blogController = new SimpleMVC.Controller("/", {
         get: function () {
             return this.view('contact', { title: "Contact Me" });
         },
-        post: function (req) {
-
+        post: async function (req) {
+            const { name, email, phone, message } = req.fields;
+            const smtp = new SimpleMVC.SMTP();
+            const result = await smtp.sendMail(`"${name}" <${email}>`, "pollux.haochen@andyes.net", "New Contact", "From:{{name}} - {{email}}<br><br>Message:<br>{{message}}<br><br>Phone: {{phone}}", { name, email, phone, message });
+            console.log(result);
+            return this.view('contact', { message: { type: 'success', message: "Your message has been sent!" }, title: "Contact Me" });
         }
     },
 });

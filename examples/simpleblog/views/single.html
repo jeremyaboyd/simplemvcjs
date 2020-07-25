@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    {{> shared/head}}
+</head>
+
+<body>
+    {{> shared/nav}}
+
+    <header class="masthead" style="background-color:#999">
+        <div class="overlay"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10 col-lg-8 mx-auto">
+                    <div class="post-heading">
+                        <h1>{{model.title}}</h1>
+                        {{#model.subtitle}}<h2 class="subheading">{{.}}</h2>{{/model.subtitle}}
+                        <span class="meta">Posted by <a href="/author/{{author.slug}}">{{model.author.name}}</a> on <a href="/post/{{slug}}">{{model.date_formatted}}</a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10 col-lg-8 mx-auto">
+                    {{{model.content}}}
+                </div>
+            </div>
+        </div>
+    </article>
+
+    {{> shared/footer}}
+</body>
+
+</html>

@@ -6,6 +6,8 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')(session);
 
+const SimpleMVCController = require('./simplemvc.controller.js');
+
 class SimpleMVCApp {
     express;
     __dirname = require('path').resolve();
@@ -15,13 +17,9 @@ class SimpleMVCApp {
         this.express.use(formidable());
         this.express.use(cookieParser());
 
-        this.express.engine('mustache', mustache());
-        this.express.set('view engine', 'mustache');
-        this.express.set('views', this.__dirname + '/src/views');
-    }
-
-    addMiddleware(middleware) {
-        this.express.use(middleware);
+        this.express.engine('html', mustache());
+        this.express.set('view engine', 'html');
+        this.express.set('views', this.__dirname + '/views');
     }
 
     addControllers(...controllers) {
@@ -41,6 +39,13 @@ class SimpleMVCApp {
                     }
                 });
             }
+        });
+    }
+
+    initStaticFiles(path) {
+        const staticPath = this.__dirname + path;
+        this.express.get('*', function(req, res) {
+            res.sendFile(staticPath + req.path);
         });
     }
 

@@ -38,7 +38,7 @@ This quick start assume a slight familiarity with Node.js and how to structure a
 	#server
 	HOST=localhost
 	PORT=8080
-	SESSION_SECRET=\Qvu$-pN84PfeJ>~sW
+	SESSION_SECRET=
 
 	#database
 	MONGO_SCHEME=
@@ -61,8 +61,8 @@ While SimpleMVC is highly opinionated, we have a relatively lax project structur
 ```
 /.env       - this is the dotenv file the sets your application's global variables
 /app.js     - this can be any name, but throughout documentation it will be refered to as your app.js
-/src/views  - the root directory for your view templates
-/src/static - the root directory for your static files
+/views  - the root directory for your view templates
+/static - the root directory for your static files
 ```
 These directories would be relative to your `app.js` file and are required for finding specific views and static content.
 
@@ -89,7 +89,7 @@ In the previous example, if the controller's base path was defined as `"/"`, the
 ### Views
 Views are [Mustache(5)](https://mustache.github.io/mustache.5.html) templates. And when you return a view with a model from your route, the model will be accessed as  {{model}} inside the Mustache templates.
 
-All views need the `.mustache` file extension.
+All views need a `.html` file extension.
 
 ## A Simple Example
 ```js

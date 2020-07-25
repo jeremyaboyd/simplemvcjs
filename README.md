@@ -1,8 +1,14 @@
-## SimpleMVC.js
+# SimpleMVC.js
 A highly opinionated MVC micro web-framework for Node.js
 
-### Quick Start
-This quick start assume a slight familiarity with Node.js and how to structure a project
+## Examples
+1. [Simple Blog](https://github.com/jeremyaboyd/simplemvcjs/tree/master/examples/simpleblog)
+    Shows the basic use of routing, views, static files, and the SimpleMVC.SMTP class.
+2. Simple SaaS - Coming Soon
+    Utilizes all parts of the SimpleMVC library (routing, views, json responses, static files, SMTP, and Membership)
+
+## Quick Start
+This quick start assumes atleast a base familiarity with Node.js, NPM, and how to build a website.
 1. Initialize your NPM package
 
 	`npm init`, and fill out the questions
@@ -56,13 +62,13 @@ This quick start assume a slight familiarity with Node.js and how to structure a
 	```
 8. Run it via `node ./app.js`
 
-### Project Structure
+## Project Structure
 While SimpleMVC is highly opinionated, we have a relatively lax project structure requirement. There is a specific structure for the core files required.
 ```
 /.env       - this is the dotenv file the sets your application's global variables
 /app.js     - this can be any name, but throughout documentation it will be refered to as your app.js
-/views  - the root directory for your view templates
-/static - the root directory for your static files
+/views/     - the root directory for your view templates
+/static/    - the root directory for your static files
 ```
 These directories would be relative to your `app.js` file and are required for finding specific views and static content.
 

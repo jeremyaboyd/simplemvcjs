@@ -16,9 +16,7 @@ This quick start assumes atleast a base familiarity with Node.js, NPM, and how t
 	`npm init`, and fill out the questions
 2. Include simplemvc.js in your project
     1. By [downloading](https://raw.githubusercontent.com/jeremyaboyd/simplemvcjs/master/src/simplemvc.js) and including simplemvc.js manually in your project.
-    2. Through npm ***(not currently an npm repository)***
-    
-         `npm install simplemvcjs`
+    2. Through npm by running `npm install simplemvcjs`
 3. Create and/or open app.js
 4. Import/Require SimpleMVC
 	

@@ -1,4 +1,4 @@
-const SimpleMVC = require('../../src/simplemvc.js');
+const SimpleMVC = require('simplemvcjs');
 const moment = require('moment');
 
 const posts = [

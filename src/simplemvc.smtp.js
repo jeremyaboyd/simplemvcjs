@@ -6,11 +6,11 @@ class SimpleMVCSMTP {
         this.transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: Number(process.env.SMTP_PORT),
-            secure: Boolean(process.env.SMTP_SECURE), // true for 465, false for other ports
+            secure: process.env.SMTP_SECURE === 'true',
             auth: {
-                user: process.env.SMTP_USER, // generated ethereal user
-                pass: process.env.SMTP_PASS, // generated ethereal password
-            },
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+            }
         });
     }
 

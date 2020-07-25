@@ -3,8 +3,10 @@ A highly opinionated MVC micro web-framework for Node.js
 
 ## Examples
 1. [Simple Blog](https://github.com/jeremyaboyd/simplemvcjs/tree/master/examples/simpleblog)
+
     Shows the basic use of routing, views, static files, and the SimpleMVC.SMTP class.
 2. Simple SaaS - Coming Soon
+
     Utilizes all parts of the SimpleMVC library (routing, views, json responses, static files, SMTP, and Membership)
 
 ## Quick Start

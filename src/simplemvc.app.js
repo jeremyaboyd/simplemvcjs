@@ -45,7 +45,11 @@ class SimpleMVCApp {
     initStaticFiles(path) {
         const staticPath = this.__dirname + path;
         this.express.get('*', function (req, res) {
-            res.sendFile(staticPath + req.path);
+            try {
+                res.sendFile(staticPath + req.path);
+            } catch {
+                res.status(404).send(`File: ${req.path} not found.`);
+            }
         });
     }
 

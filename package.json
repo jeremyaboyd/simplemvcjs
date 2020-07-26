@@ -3,9 +3,6 @@
   "version": "0.9.0",
   "description": "A highly opinionated MVC micro web-framework.",
   "main": "./src/simplemvc.js",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jeremyaboyd/simplemvcjs.git"

@@ -8,6 +8,7 @@ A highly opinionated MVC micro web-framework for Node.js
 2. Simple SaaS - Coming Soon
 
     Utilizes all parts of the SimpleMVC library (routing, views, json responses, static files, SMTP, and Membership)
+3. [Shortlinker](https://github.com/jeremyaboyd/simplemvcjs/tree/master/examples/shortlinks)
 
 ## Quick Start
 This quick start assumes atleast a base familiarity with Node.js, NPM, and how to build a website.

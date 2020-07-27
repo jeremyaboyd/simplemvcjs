@@ -55,7 +55,9 @@ class SimpleMVCApp {
 
     initSessions() {
         var sessionOptions = {
-            secret: process.env.SESSION_SECRET
+            secret: process.env.SESSION_SECRET,
+            resave: false,
+            saveUninitialized: false
         };
         if (this.useMongoose)
             sessionOptions.store = new MongoStore({ mongooseConnection: mongoose.connection, collection: 'simple_sessions' });

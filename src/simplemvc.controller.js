@@ -1,6 +1,6 @@
 class SimpleMVCViewResult {
-    viewName;
-    model;
+    viewName = "";
+    model = {};
     status = 200;
     constructor(viewName, model, status) {
         this.viewName = viewName;
@@ -9,27 +9,27 @@ class SimpleMVCViewResult {
     }
 }
 
-class SimpleMVCContentResult {
+class SimpleMVCTextResult {
     content = "";
     status = 200;
-    constructor(content, status) {
+    constructor(content = "", status = 200) {
         this.content = content;
-        this.status = status || 200;
+        this.status = status;
     }
 }
 
 class SimpleMVCJsonResult {
-    data;
+    data = {};
     status = 200;
-    constructor(data, status) {
+    constructor(data = {}, status = 200) {
         this.data = data;
-        this.status = status || 200;
+        this.status = status;
     }
 }
 
 class SimpleMVCRedirectResult {
-    url;
-    constructor(url) {
+    url = "";
+    constructor(url = "") {
         this.url = url;
     }
 }
@@ -37,24 +37,22 @@ class SimpleMVCRedirectResult {
 class SimpleMVCController {
     basePath;
     routes = {};
-    constructor(basePath, routes) {
+    constructor(basePath = "/", routes = {}) {
         this.basePath = basePath;
         if (routes)
             this.addRoutes(routes);
     }
 
-    addRoutes(routes) {
+    addRoutes(routes = {}) {
         Object.keys(routes).forEach((v) => {
             let route = routes[v];
             if (typeof route === "function") {
                 this.routes[v] = this.requestHandler(route);
-            } else {
+            } else if (typeof route === "object") {
                 this.routes[v] = {};
-                if (route["get"])
-                    this.routes[v].get = this.requestHandler(route.get);
-
-                if (route["post"])
-                    this.routes[v].post = this.requestHandler(route.post);
+                Object.keys(route)
+                    .forEach(verb =>
+                        this.routes[v][verb = this.requestHandler(route[verb])]);
             }
         });
     }
@@ -77,7 +75,7 @@ class SimpleMVCController {
                     res.render(viewPath, vm);
                 } else if (result instanceof SimpleMVCJsonResult) {
                     res.json(result.data);
-                } else if (result instanceof SimpleMVCContentResult) {
+                } else if (result instanceof SimpleMVCTextResult) {
                     res.send(result.content);
                 } else if (result instanceof SimpleMVCRedirectResult) {
                     res.redirect(result.url);
@@ -88,10 +86,14 @@ class SimpleMVCController {
         }
     }
 
-    view = (view, model, status) => new SimpleMVCViewResult(view, model, status);
-    json = (data, status) => new SimpleMVCJsonResult(data, status);
-    content = (content, status) => new SimpleMVCContentResult(content, status);
-    redirect = (url) => new SimpleMVCRedirectResult(url);
+    view = (view = "", model = {}, status = 200) => new SimpleMVCViewResult(view, model, status);
+    json = (data = {}, status = 200) => new SimpleMVCJsonResult(data, status);
+    /**
+     * @deprecated Since version 0.9.2. Will be deleted in version 1.0. Use text instead.
+     */
+    content = (content = "", status = 200) => new SimpleMVCTextResult(content, status);
+    text = (text = "", status = 200) => new SimpleMVCTextResult(text, status);
+    redirect = (url = "") => new SimpleMVCRedirectResult(url);
 }
 
 module.exports = SimpleMVCController;

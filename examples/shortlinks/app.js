@@ -1,5 +1,3 @@
-"use strict";
-
 const SimpleMVC = require('simplemvcjs');
 const fs = require('fs');
 const URL = require('url').URL;

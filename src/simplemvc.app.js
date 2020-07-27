@@ -30,12 +30,10 @@ class SimpleMVCApp {
                     const fullPath = controller.basePath + v;
                     if (typeof route === "function") {
                         this.express.all(fullPath, route);
-                    } else {
-                        if (route["get"])
-                            this.express.get(fullPath, route.get);
-
-                        if (route["post"])
-                            this.express.post(fullPath, route.post);
+                    } else if (typeof route === "object") {
+                        Object.keys(route).forEach(verb => {
+                            this.express[verb](fullPath, route[verb]);
+                        });
                     }
                 });
             }

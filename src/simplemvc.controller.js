@@ -51,10 +51,13 @@ class SimpleMVCController {
             } else if (typeof route === "object") {
                 this.routes[v] = {};
                 Object.keys(route)
-                    .forEach(verb =>
-                        this.routes[v][verb = this.requestHandler(route[verb])]);
+                    .forEach(verb => {
+                        this.routes[v][verb] = this.requestHandler(route[verb]);
+                    });
             }
         });
+
+        console.log(this.routes);
     }
 
     requestHandler(route) {

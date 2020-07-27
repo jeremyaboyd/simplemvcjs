@@ -1,4 +1,4 @@
-const SimpleMVC = require('simplemvcjs');
+const SimpleMVC = require('../../src/simplemvc.js');
 const moment = require('moment');
 
 const posts = [
@@ -36,10 +36,12 @@ const sortByDateDesc = (a, b) => {
 }
 
 const blogController = new SimpleMVC.Controller("/", {
-    "": function () {
-        const recentPosts = posts.sort(sortByDateDesc);
-        recentPosts.forEach(p => p.date_formatted = moment(p.date).format('MMMM Do YYYY hh:mm a'));
-        return this.view('index', { posts: recentPosts, title: "My Blog" });
+    "": {
+        get: function () {
+            const recentPosts = posts.sort(sortByDateDesc);
+            recentPosts.forEach(p => p.date_formatted = moment(p.date).format('MMMM Do YYYY hh:mm a'));
+            return this.view('index', { posts: recentPosts, title: "My Blog" });
+        }
     },
     "post/:id": function (req) {
         const post = posts.filter(p => p.slug === req.params.id)[0];

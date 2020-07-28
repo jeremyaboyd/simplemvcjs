@@ -92,8 +92,11 @@ authController.beforeRoute = function (req) {
 }
 
 const adminController = new SimpleMVC.Controller("/admin/", {
-
+    "": function() {
+        return this.text('Welcome Administrator!');
+    }
 });
+
 adminController.beforeRoute = function(req) {
     if(!req.session.isAdmin)
         return this.redirect('/auth');

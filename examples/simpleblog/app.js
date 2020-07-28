@@ -1,5 +1,6 @@
 const SimpleMVC = require('../../src/simplemvc.js');
 const moment = require('moment');
+const bcrypt = require('bcrypt');
 
 const posts = [
     {
@@ -71,7 +72,35 @@ const blogController = new SimpleMVC.Controller("/", {
     },
 });
 
+const authController = new SimpleMVC.Controller("/auth/", {
+    "": {
+        get: function () {
+            return this.view('login', { title: "Login" });
+        },
+        post: async function (req) {
+            if (await bcrypt.compare(req.fields.password, process.env.ADMIN_PASSWORD)) {
+                console.log("post compared");
+                return this.redirect('/admin');
+            }
+            return this.view('login', { err: "WRONG PASSWORD BOY-O   " + (await bcrypt.hash(req.fields.password, 10)) });
+        }
+    }
+})
+authController.beforeRoute = function (req) {
+    if (req.session.admin)
+        return this.redirect('/admin');
+}
+
+const adminController = new SimpleMVC.Controller("/admin/", {
+
+});
+adminController.beforeRoute = function(req) {
+    if(!req.session.isAdmin)
+        return this.redirect('/auth');
+};
+
 const app = new SimpleMVC.App();
-app.addControllers(blogController);
+app.initSessions();
+app.addControllers(blogController, authController);
 app.initStaticFiles('/static');
 app.listen();

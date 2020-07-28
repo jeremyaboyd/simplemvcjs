@@ -37,6 +37,8 @@ class SimpleMVCRedirectResult {
 class SimpleMVCController {
     basePath;
     routes = {};
+    beforeRoute = function (req) { };
+
     constructor(basePath = "/", routes = {}) {
         this.basePath = basePath;
         if (routes)
@@ -60,27 +62,38 @@ class SimpleMVCController {
 
     requestHandler(route) {
         const that = this;
+        
+        const processResult = (result, req, res) => {
+            res.status(result.status || 200);
+            if (result instanceof SimpleMVCViewResult) {
+                //remove slash to make absolute path relative for mustache
+                const viewPath = (that.basePath + result.viewName).substring(1);
+                const vm = {
+                    session: req.session,
+                    model: result.model
+                };
+
+                res.render(viewPath, vm);
+            } else if (result instanceof SimpleMVCJsonResult) {
+                res.json(result.data);
+            } else if (result instanceof SimpleMVCTextResult) {
+                res.send(result.content);
+            } else if (result instanceof SimpleMVCRedirectResult) {
+                res.redirect(result.url);
+            }
+        }
+
         return async (req, res) => {
             try {
-                const result = await route.call(that, req, res);
+                let result = await this.beforeRoute.call(that, req);
+                if (result) {
+                    processResult(result, req, res);
+                    return;
+                }
+                result = await route.call(that, req, res);
                 if (!result) return;
 
-                res.status(result.status || 200);
-                if (result instanceof SimpleMVCViewResult) {
-                    //remove slash to make absolute path relative for mustache
-                    const viewPath = (this.basePath + result.viewName).substring(1);
-                    const vm = {
-                        session: req.session,
-                        model: result.model
-                    };
-                    res.render(viewPath, vm);
-                } else if (result instanceof SimpleMVCJsonResult) {
-                    res.json(result.data);
-                } else if (result instanceof SimpleMVCTextResult) {
-                    res.send(result.content);
-                } else if (result instanceof SimpleMVCRedirectResult) {
-                    res.redirect(result.url);
-                }
+                processResult(result, req, res);
             } catch (ex) {
                 res.status(500).send(ex);
             }

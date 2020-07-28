@@ -56,8 +56,6 @@ class SimpleMVCController {
                     });
             }
         });
-
-        console.log(this.routes);
     }
 
     requestHandler(route) {

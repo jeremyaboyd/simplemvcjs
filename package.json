@@ -1,6 +1,6 @@
 {
   "name": "simplemvcjs",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "A highly opinionated MVC micro web-framework.",
   "main": "./src/simplemvc.js",
   "repository": {

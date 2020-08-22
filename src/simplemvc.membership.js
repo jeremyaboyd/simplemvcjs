@@ -38,7 +38,7 @@ class SimpleMVCMembership {
 
     async addUser(email, password, profile) {
         if (await this.userModel.findOne({ email }))
-            return false;
+            return;
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new this.userModel({
@@ -47,8 +47,7 @@ class SimpleMVCMembership {
             password: hashedPassword
         });
 
-        await newUser.save();
-        return true;
+        return this.convertUser(await newUser.save());
     }
 
     async updateUserEmail(id, email) {

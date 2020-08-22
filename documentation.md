@@ -163,3 +163,76 @@ Returns a `mustache` rendered view bound to the object in the `model` parameter.
 ```js
 return this.view('index', {name: request.fields.name});
 ```
+
+## SimpleMVC.Membership
+The Membership service contains various helper methods for enabling authentication on an application.
+
+>NOTE: The Membership service requires the database to be initialized, and stores users in the `simple_users` collection.
+
+Most functions return a `User` object, which is defined as:
+```js
+{
+    id: ObjectId,
+    email: String,
+    profile: { String: String }
+}
+```
+
+### `Membership.constructor()`
+Initializes the Membership service and underlying database model.
+
+### `Membership.addUser(email, password, profile)`
+Creates a user. Returns the new user if creation was successful.
+
+### `Membership.deleteUser(id)`
+Delete a user from the collection.
+
+### `Membership.getUser(id)`
+Retrieve a user from the collection by their id.
+
+### `Membership.getUserByEmail(email)`
+Retrieve a user from the collection by their email.
+
+### `Membership.updateUserEmail(id, email)`
+Updates the user's email.
+
+### `Membership.updateUserPassword(id, password)`
+Updates the user's password.
+
+### `Membership.updateUserProfile(id, profileObject)`
+Updates the user's profile.
+
+>NOTE: Only updates the properties that are passed in. Currently there is no way to delete a profile property.
+
+### `Membership.validateUser(email, password)`
+Returns the user if the email and password match what is in the database.
+
+### User Activation
+User activation is optional. It creates 2 user profile properties called `activationCode` and `activatedOn`. If you wish to use the built in activation, do not override these values.
+### `Membership.sendActivationEmail(id, from, subject, template)`
+Sends an activation email to the email address in the collection for the user. The email is sent through the `SMTP Service`. The email is rendered from the mustache markup passed in through the `template` parameter.
+
+```js
+const user = membership.addUser(req.fields.email, req.fields.password, { name: req.fields.name });
+if(user)
+    membership.sendActivation(user.id, 'John Q. Public <jqp@example.com>', 'Activate your account', 'Here is your activation code: {{activationCode}}');
+```
+
+>NOTE: Uses the SMTP Service, so it requires the `SMTP_*` environment variable to have been set.
+
+### `Membership.activateUser(email, activationCode)`
+Attempts to activate the user's account by matching the `activationCode` parameter to the `user.profile.activationCode` property. Returns `true` if successful.
+
+```js
+...
+    "activate": {
+        get: function(req) {
+            if(membership.activateUser(req.query.email, req.query.activationCode)) {
+                return this.view('activation/success');
+            }
+
+            return this.view('activation/error');
+        }
+    }
+...
+```

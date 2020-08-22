@@ -22,7 +22,7 @@ class SimpleMVCMembership {
         this.userModel = new mongoose.model('simple_user', {
             email: String,
             password: String,
-            created_on: { type: Date, default: Date.now },
+            createdOn: { type: Date, default: Date.now },
             profile: { type: Map, of: String }
         });
 
@@ -95,8 +95,8 @@ class SimpleMVCMembership {
     async sendActivationEmail(id, from, subject, template) {
         const user = this.getUser(id);
         const activationCode = getUniqueID();
-        membership.updateUserProfile(user.id, { activationCode });
-        await smtp.sendMail(from, user.email, subject, template, { profile: user.profile, email: user.email });
+        membership.updateUserProfile(id, { activationCode });
+        await smtp.sendMail(from, user.email, subject, template, { ...user.profile, email: user.email });
     }
 
     async activateUser(email, activationCode) {

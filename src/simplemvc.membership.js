@@ -88,7 +88,7 @@ class SimpleMVCMembership {
         return this.convertUser(user);
     }
 
-    async deleteuser(id) {
+    async deleteUser(id) {
         await this.userModel.findByIdAndDelete(id);
     }
 

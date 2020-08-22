@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const smtp = new SimpleMVC.SMTP();
 
 class SimpleMVCUser {
     id;
@@ -10,6 +11,11 @@ class SimpleMVCUser {
         this.email = email;
     }
 }
+
+const getUniqueID = () => {
+    const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    return bcrypt.hash(s4() + s4() + s4(), 10);
+};
 
 class SimpleMVCMembership {
     constructor() {
@@ -84,6 +90,22 @@ class SimpleMVCMembership {
 
     async deleteuser(id) {
         await this.userModel.findByIdAndDelete(id);
+    }
+
+    async sendActivationEmail(id, from, subject, template) {
+        const user = this.getUser(id);
+        const activationCode = getUniqueID();
+        membership.updateUserProfile(user.id, { activationCode });
+        await smtp.sendMail(from, user.email, subject, template, { profile: user.profile, email: user.email });
+    }
+
+    async activateUser(email, activationCode) {
+        const user = this.getUserByEmail(email);
+        if(user && user.profile.activationCode === activationCode) {
+            this.updateUserProfile(user.id, { activatedOn: Date.now() });
+            return true;
+        }
+        return false;
     }
 }
 

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const smtp = new SimpleMVC.SMTP();
+const smtp = new (require('./simplemvc.smtp.js'))();
 
 class SimpleMVCUser {
     id;

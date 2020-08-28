@@ -9,7 +9,8 @@
     <body>
         <h1>Super Shortlinker</h1>
         <h2>Create Short Links</h2>
-        {{#message}}<span style="color: {{color}}">{{message}}</span>{{/message}}
+        {{#model.message}}<span style="color: {{color}}">{{message}}</span>{{/model.message}}
+        {{#session.user}}
         <form id="link-maker" method="post" enctype="application/x-www-form-urlencoded">
             <p><label>Short Link:<br><input id="short-link"></label></p>
             <p><label>Full URL:<br><input name="url" type="url"></label></p>
@@ -24,5 +25,12 @@
                 linkMaker.submit();
             })
         </script>
+        {{/session.user}}
+        <h3>Links submitted by our users</h3>
+        <ul>
+            {{#model.links}}
+            <li><a href="/l/{{link}}">{{url}}</a></li>
+            {{/model.links}}
+        </ul>
     </body>
 </html>

@@ -95,7 +95,7 @@ The `beforeRoute` property is a `function` that can be overwritten to provide lo
 
 ```js
 adminController.beforeRoute = function(req) {
-    if(!req.session.user || !request.session.user.profile.isAdmin)
+    if(!req.session.user || !req.session.user.profile.isAdmin)
         return this.redirect('/auth/login');
 }
 ```

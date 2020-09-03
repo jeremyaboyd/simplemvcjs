@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const smtp = new (require('./simplemvc.smtp.js'))();
 
 class SimpleMVCUser {
     id;
@@ -11,12 +12,17 @@ class SimpleMVCUser {
     }
 }
 
+const getUniqueID = () => {
+    const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    return bcrypt.hash(s4() + s4() + s4(), 10);
+};
+
 class SimpleMVCMembership {
     constructor() {
         this.userModel = new mongoose.model('simple_user', {
             email: String,
             password: String,
-            created_on: { type: Date, default: Date.now },
+            createdOn: { type: Date, default: Date.now },
             profile: { type: Map, of: String }
         });
 
@@ -32,7 +38,7 @@ class SimpleMVCMembership {
 
     async addUser(email, password, profile) {
         if (await this.userModel.findOne({ email }))
-            return false;
+            return;
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new this.userModel({
@@ -41,8 +47,7 @@ class SimpleMVCMembership {
             password: hashedPassword
         });
 
-        await newUser.save();
-        return true;
+        return this.convertUser(await newUser.save());
     }
 
     async updateUserEmail(id, email) {
@@ -82,8 +87,24 @@ class SimpleMVCMembership {
         return this.convertUser(user);
     }
 
-    async deleteuser(id) {
+    async deleteUser(id) {
         await this.userModel.findByIdAndDelete(id);
+    }
+
+    async sendActivationEmail(id, from, subject, template) {
+        const user = this.getUser(id);
+        const activationCode = getUniqueID();
+        membership.updateUserProfile(id, { activationCode });
+        await smtp.sendMail(from, user.email, subject, template, { ...user.profile, email: user.email });
+    }
+
+    async activateUser(email, activationCode) {
+        const user = this.getUserByEmail(email);
+        if(user && user.profile.activationCode === activationCode) {
+            this.updateUserProfile(user.id, { activatedOn: Date.now() });
+            return true;
+        }
+        return false;
     }
 }
 

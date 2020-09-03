@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Super Shortlinker</title>
+        <style>
+
+        </style>
+    </head>
+    <body>
+        <h1>Super Shortlinker</h1>
+        <h2>Register</h2>
+        {{#model.message}}<span style="color: {{color}}">{{message}}</span>{{/model.message}}
+        <form action="/register" method="POST">
+            <p><label>Email<br><input type="email" name="email"></label></p>
+            <p><label>Password<br><input type="password" name="password"></label></p>
+            <button type="submit">Register</button>
+        </form>
+
+    </body>
+</html>

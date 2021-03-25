@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "simplemvcjs": "^0.9.1"
+    "simplemvcjs": "^0.9.6"
   }
 }

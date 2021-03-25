@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "moment": "^2.29.1",
-    "simplemvcjs": "^0.1.0"
+    "simplemvcjs": "^0.9.6"
   }
 }

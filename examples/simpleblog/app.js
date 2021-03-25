@@ -105,5 +105,5 @@ adminController.beforeRoute = function(req) {
 const app = new SimpleMVC.App();
 app.initSessions();
 app.addControllers(blogController, authController);
-app.initStaticFiles('/static');
+app.initStaticFiles('static');
 app.listen();

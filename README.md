@@ -69,7 +69,7 @@ While SimpleMVC is highly opinionated, we have a relatively lax project structur
 /.env       - this is the dotenv file the sets your application's global variables
 /app.js     - this can be any name, but throughout documentation it will be refered to as your app.js
 /views/     - the root directory for your view templates
-/static/    - the root directory for your static files
+/static/    - the root directory for your static files - can be renamed with app.initStaticFiles('/path/to/static/files');
 ```
 These directories would be relative to your `app.js` file and are required for finding specific views and static content.
 

@@ -61,13 +61,13 @@ app.initSessions();
 > NOTE: due to a known/purposeful memory leak in the default memory store used by `express-session` it is recommended that you initialize the database first in a production environment. This also gives you an added bonus of being able to scale your application horizontally as well.
 
 ### `App.initStaticFiles(path: string)`
-Adds a file route for http://{host}:{port}/* to be run after no other routes are found. This route will then look for files to be delivered stored at the relative path provided by the `path` parameter.
+Adds a file route for http://{host}:{port}/* to be run after no other routes are found. This route will then look for files to be delivered stored at the path provided by the `path` parameter (absolute or relative to application root).
 
 ```js
 app.initStaticFiles('static');
 ```
 
-> NOTE: This should be called only AFTER all controllers have been added.
+> NOTE: **Prior to version 0.9.7** This should be called only AFTER all controllers have been added.
 
 ## SimpleMVC.Controller
 The Controller class contains the logic for creating containered routes.

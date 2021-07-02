@@ -18,12 +18,12 @@ This quick start assumes atleast a base familiarity with Node.js, NPM, and how t
 2. Include simplemvc.js in your project
     1. By [downloading](https://raw.githubusercontent.com/jeremyaboyd/simplemvcjs/master/src/simplemvc.js) and including simplemvc.js manually in your project.
     2. Through npm by running `npm install simplemvcjs`
-3. Create and/or open app.js
-4. Import/Require SimpleMVC
+3. Create and open `app.js` (needed for steps 4-6)
+4. Import SimpleMVC
 	
 	`const SimpleMVC = require('simplemvcjs');`
 	
-	or if you downloaded the project
+	or if you downloaded the project:
 	
 	`const SimpleMVC = require('/path/to/simplemvc.js');`
 5. Create your first SimpleMVC.Controller
@@ -34,13 +34,13 @@ This quick start assumes atleast a base familiarity with Node.js, NPM, and how t
 	    }
 	});
 	```
-6. Create your your SimpleMVC.App
+6. Create your SimpleMVC.App
 	```js
 	const app = new SimpleMVC.App();
 	app.addControllers(HomeController);
 	app.listen();
 	```
-7. Create your `dotenv` file
+7. Create the `.env` file
 	```ini
 	#server
 	HOST=localhost
@@ -67,7 +67,7 @@ This quick start assumes atleast a base familiarity with Node.js, NPM, and how t
 While SimpleMVC is highly opinionated, we have a relatively lax project structure requirement. There is a specific structure for the core files required.
 ```
 /.env       - this is the dotenv file the sets your application's global variables
-/app.js     - this can be any name, but throughout documentation it will be refered to as your app.js
+/app.js     - this can be any name, but throughout documentation it will be refered to as app.js
 /views/     - the root directory for your view templates
 /static/    - the root directory for your static files - can be renamed with app.initStaticFiles('/path/to/static/files');
 ```

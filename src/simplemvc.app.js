@@ -9,7 +9,6 @@ const MongoStore = require('connect-mongo')(session);
 const SimpleMVCController = require('./simplemvc.controller.js');
 
 class SimpleMVCApp {
-    express;
     __dirname = require('path').resolve();
     constructor() {
         this.express = express();

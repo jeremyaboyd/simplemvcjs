@@ -30,14 +30,14 @@ This quick start assumes atleast a base familiarity with Node.js, NPM, and how t
 	```js
 	const HomeController = new SimpleMVC.Controller("/", {
 	    "": function() {
-	        return this.content("Hello, World!");
+	        return this.text("Hello, World!");
 	    }
 	});
 	```
 6. Create your your SimpleMVC.App
 	```js
 	const app = new SimpleMVC.App();
-	app.addControlers(HomeController);
+	app.addControllers(HomeController);
 	app.listen();
 	```
 7. Create your `dotenv` file

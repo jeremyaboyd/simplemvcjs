@@ -3,8 +3,12 @@ const mustache = require('mustache-express');
 const formidable = require('express-formidable');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const mongoose = require('mongoose');
-const MongoStore = require('connect-mongo');
+const {
+    initSequelize,
+    createSessionStore,
+    defineModels,
+    syncModels
+} = require('./simplemvc.db.js');
 
 const SimpleMVCController = require('./simplemvc.controller.js');
 
@@ -54,29 +58,20 @@ class SimpleMVCApp {
             saveUninitialized: false
         };
 
-        if (this.useMongoose) {
+        if (this.useDatabase) {
             if (this.dbConnectionPromise)
                 await this.dbConnectionPromise;
-            sessionOptions.store = MongoStore.create({
-                client: mongoose.connection.getClient(),
-                collectionName: 'simple_sessions'
-            });
+            sessionOptions.store = createSessionStore();
         }
 
         this.express.use(session(sessionOptions));
     }
 
-    initDbConnection() {
-        this.useMongoose = true;
-        const {
-            MONGO_SCHEME,
-            MONGO_USER,
-            MONGO_PASSWORD,
-            MONGO_SERVER,
-            MONGO_DB
-        } = process.env;
-        const connectionString = `${MONGO_SCHEME}://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_SERVER}/${MONGO_DB}`;
-        this.dbConnectionPromise = mongoose.connect(connectionString);
+    initDatabase() {
+        this.useDatabase = true;
+        initSequelize();
+        defineModels();
+        this.dbConnectionPromise = syncModels();
         return this.dbConnectionPromise;
     }
 

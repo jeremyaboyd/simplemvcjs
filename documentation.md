@@ -1,5 +1,5 @@
 # SimpleMVC.js Documentation
-This documentation targets SimpleMVC.js **0.9.8+**. Copy [`.env.example`](.env.example) when configuring a new application.
+This documentation targets SimpleMVC.js **0.10.1+**. Copy [`.env.example`](.env.example) when configuring a new application.
 
 ### Adding the SimpleMVC package to your application
 1. Install the `simplemvcjs` package from npm (or download it manually).
@@ -42,11 +42,11 @@ app.listen('example.com', 8080);
 
 > NOTE: If `host` or `port` parameters are falsey, the `HOST` or `PORT` environment variables will be used.
 
-### `App.initDbConnection()`
-Initializes the MongoDB database connection, and `mongoose` data context using the `MONGO_*` environment variables.
+### `App.initDatabase()`
+Initializes the SQL database connection using [Sequelize](https://sequelize.org/docs/v6/) and the `DB_*` environment variables. Creates framework tables (`simple_users`, `simple_sessions`) via `sync()`.
 
 ```js
-app.initDbConnection();
+await app.initDatabase();
 ```
 
 ### `App.initSessions()`
@@ -56,7 +56,7 @@ Initializes the Session middleware. Returns a `Promise` and **requires** `SESSIO
 await app.initSessions();
 ```
 
-> NOTE: If the database connection has been previously initialised with `initDbConnection()`, session state will be stored in the collection `simple_sessions`, otherwise it will be stored only in memory.
+> NOTE: If the database connection has been previously initialised with `initDatabase()`, session state will be stored in the `simple_sessions` table, otherwise it will be stored only in memory.
 
 > NOTE: due to a known/purposeful memory leak in the default memory store used by `express-session` it is recommended that you initialize the database first in a production environment. This also gives you an added bonus of being able to scale your application horizontally as well.
 
@@ -159,15 +159,24 @@ return this.view('index', {name: request.fields.name});
 
 Views receive `{{model}}` for the route model and a limited `{{session}}` object (`user`, `admin`, `isAdmin` only). Route handlers still have full access to `req.session`.
 
+## SimpleMVC.getSequelize()
+Returns the shared Sequelize instance after `App.initDatabase()` has been called. Use this to define application-specific models in the same database.
+
+```js
+const { DataTypes } = require('sequelize');
+const sequelize = SimpleMVC.getSequelize();
+const Post = sequelize.define('Post', { title: DataTypes.STRING });
+```
+
 ## SimpleMVC.Membership
 The Membership service contains various helper methods for enabling authentication on an application.
 
->NOTE: The Membership service requires the database to be initialized, and stores users in the `simple_users` collection.
+>NOTE: The Membership service requires the database to be initialized, and stores users in the `simple_users` table.
 
 Most functions return a `User` object, which is defined as:
 ```js
 {
-    id: ObjectId,
+    id: Number,
     email: String,
     profile: { String: String }
 }
@@ -180,7 +189,7 @@ Initializes the Membership service and underlying database model.
 Creates a user. Returns the new user if creation was successful.
 
 ### `Membership.deleteUser(id)`
-Delete a user from the collection.
+Delete a user from the database.
 
 ### `Membership.getUser(id)`
 Retrieve a user from the collection by their id.

@@ -22,7 +22,7 @@ const controller = new SimpleMVC.Controller("/", {
             if (!req.session.user)
                 return this.redirect('/login');
 
-            if (await links.addLink({ userId: req.session.user.id, link: req.fields.link, url: req.fields.url })) {
+            if (await links.addLink({ userId: req.session.user.id, link: req.params.id, url: req.fields.url })) {
                 return this.redirect('/');
             }
             return this.redirect('/');
@@ -67,7 +67,7 @@ controller.allowExternalRedirects = true;
 (async () => {
     const app = new SimpleMVC.App();
     app.addControllers(controller);
-    app.initDbConnection();
+    await app.initDatabase();
     await app.initSessions();
     app.listen();
 })();

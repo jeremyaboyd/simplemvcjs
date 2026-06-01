@@ -1,5 +1,5 @@
 # SimpleMVC.js Documentation
-This documentation is for a ***pre-release*** version of SimpleMVC.js. Any of the function signatures can change from one commit to the next, and may fall out of sync with this documentation.
+This documentation targets SimpleMVC.js **0.9.8+**. Copy [`.env.example`](.env.example) when configuring a new application.
 
 ### Adding the SimpleMVC package to your application
 1. Install the `simplemvcjs` package from npm (or download it manually).
@@ -50,13 +50,13 @@ app.initDbConnection();
 ```
 
 ### `App.initSessions()`
-Intializes the Session middleware.
+Initializes the Session middleware. Returns a `Promise` and **requires** `SESSION_SECRET` in the environment.
 
 ```js
-app.initSessions();
+await app.initSessions();
 ```
 
-> NOTE: If the database connection has been previously intialised, session state will be stored in the collection `simple_sessions`, otherwise it will be stored only in memory.
+> NOTE: If the database connection has been previously initialised with `initDbConnection()`, session state will be stored in the collection `simple_sessions`, otherwise it will be stored only in memory.
 
 > NOTE: due to a known/purposeful memory leak in the default memory store used by `express-session` it is recommended that you initialize the database first in a production environment. This also gives you an added bonus of being able to scale your application horizontally as well.
 
@@ -76,6 +76,8 @@ The Controller class contains the logic for creating containered routes.
 Initializes the routes for a controller.
 
 The optional `routes` parameter takes a dictionary where the key is a path relative to the `basePath` parameter, and the value is either a `function`, or another dictionary with an `HTTP VERB` for the key and a `function` for the value.
+
+When the value is a bare `function`, the route is registered for **GET** requests only. Use the verb dictionary form for `post`, `put`, and other methods.
 
 ```js
 const homeController = new SimpleMVC.Controller('/', {
@@ -128,24 +130,15 @@ return this.json({
 ```
 
 ### `Controller.redirect(url: string)`
-Returns an HTTP 302 Redirect to the url/path provided in the `url` paremeter.
+Returns an HTTP 302 Redirect to the url/path provided in the `url` parameter.
 
-The redirect url can be:
-* A fully qualified `URI`
+By default, only **same-origin relative paths** starting with `/` are allowed (for example `/auth/login`). Protocol-relative URLs (`//evil.com`) and absolute external URLs are rejected.
 
-    ```js
-    return this.redirect('https://google.com');
-    ```
-* An absolue path
+To allow external redirects (for example short-link targets), set `controller.allowExternalRedirects = true` on that controller instance.
 
-    ```js
-    return this.redirect('/auth/login');
-    ```
-* A relative path
-
-    ```js
-    return this.redirect('../new');
-    ```
+```js
+return this.redirect('/auth/login');
+```
 
 ### `Controller.text(text: string, status: int = 200)`
 Returns a `text/plain` response with `text` parameter as the body of the response.
@@ -163,6 +156,8 @@ Returns a `mustache` rendered view bound to the object in the `model` parameter.
 ```js
 return this.view('index', {name: request.fields.name});
 ```
+
+Views receive `{{model}}` for the route model and a limited `{{session}}` object (`user`, `admin`, `isAdmin` only). Route handlers still have full access to `req.session`.
 
 ## SimpleMVC.Membership
 The Membership service contains various helper methods for enabling authentication on an application.
@@ -213,9 +208,9 @@ User activation is optional. It creates 2 user profile properties called `activa
 Sends an activation email to the email address in the collection for the user. The email is sent through the `SMTP Service`. The email is rendered from the mustache markup passed in through the `template` parameter.
 
 ```js
-const user = membership.addUser(req.fields.email, req.fields.password, { name: req.fields.name });
-if(user)
-    membership.sendActivation(user.id, 'John Q. Public <jqp@example.com>', 'Activate your account', 'Here is your activation code: {{activationCode}}');
+const user = await membership.addUser(req.fields.email, req.fields.password, { name: req.fields.name });
+if (user)
+    await membership.sendActivationEmail(user.id, 'John Q. Public <jqp@example.com>', 'Activate your account', 'Here is your activation code: {{activationCode}}');
 ```
 
 >NOTE: Uses the SMTP Service, so it requires the `SMTP_*` environment variable to have been set.
@@ -226,8 +221,8 @@ Attempts to activate the user's account by matching the `activationCode` paramet
 ```js
 ...
     "activate": {
-        get: function(req) {
-            if(membership.activateUser(req.query.email, req.query.activationCode)) {
+        get: async function(req) {
+            if (await membership.activateUser(req.query.email, req.query.code)) {
                 return this.view('activation/success');
             }
 

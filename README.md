@@ -5,10 +5,12 @@ A highly opinionated MVC micro web-framework for Node.js
 1. [Simple Blog](https://github.com/jeremyaboyd/simplemvcjs/tree/master/examples/simpleblog)
 
     Shows the basic use of routing, views, static files, and the SimpleMVC.SMTP class.
-2. Simple SaaS - Coming Soon
+2. [Shortlinker](https://github.com/jeremyaboyd/simplemvcjs/tree/master/examples/shortlinks)
 
-    Utilizes all parts of the SimpleMVC library (routing, views, json responses, static files, SMTP, and Membership)
-3. [Shortlinker](https://github.com/jeremyaboyd/simplemvcjs/tree/master/examples/shortlinks)
+    Routing, views, MongoDB, sessions, Membership activation, and SMTP.
+3. Simple SaaS - Coming Soon
+
+    Planned example using all parts of the SimpleMVC library.
 
 ## Quick Start
 This quick start assumes atleast a base familiarity with Node.js, NPM, and how to build a website.
@@ -40,28 +42,20 @@ This quick start assumes atleast a base familiarity with Node.js, NPM, and how t
 	app.addControllers(HomeController);
 	app.listen();
 	```
-7. Create the `.env` file
-	```ini
-	#server
-	HOST=localhost
-	PORT=8080
-	SESSION_SECRET=
-
-	#database
-	MONGO_SCHEME=
-	MONGO_USER=
-	MONGO_PASSWORD=
-	MONGO_SERVER=
-	MONGO_DB=
-
-	#smtp
-	SMTP_USER=
-	SMTP_PASS=
-	SMTP_HOST=
-	SMTP_PORT=
-	SMTP_SECURE=
-	```
+7. Copy [`.env.example`](.env.example) to `.env` and set at least `HOST`, `PORT`, and `SESSION_SECRET` when using sessions.
 8. Run it via `node ./app.js`
+
+When using sessions or MongoDB, initialize the app asynchronously:
+
+```js
+(async () => {
+    const app = new SimpleMVC.App();
+    app.initDbConnection(); // optional
+    await app.initSessions(); // required when using sessions
+    app.addControllers(HomeController);
+    app.listen();
+})();
+```
 
 ## Project Structure
 While SimpleMVC is highly opinionated, we have a relatively lax project structure requirement. There is a specific structure for the core files required.
@@ -121,8 +115,11 @@ const HomeController = new SimpleMVC.Controller("/", {
     }
 });
 
-const app = new SimpleMVC.App();
-app.initDbConnection();
-app.addControllers(HomeController);
-app.listen();
+(async () => {
+    const app = new SimpleMVC.App();
+    app.initDbConnection();
+    await app.initSessions();
+    app.addControllers(HomeController);
+    app.listen();
+})();
 ```

@@ -4,7 +4,7 @@ const formidable = require('express-formidable');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const mongoose = require('mongoose');
-const MongoStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo');
 
 const SimpleMVCController = require('./simplemvc.controller.js');
 
@@ -28,7 +28,7 @@ class SimpleMVCApp {
                     const route = controller.routes[v];
                     const fullPath = controller.basePath + v;
                     if (typeof route === "function") {
-                        this.express.all(fullPath, route);
+                        this.express.get(fullPath, route);
                     } else if (typeof route === "object") {
                         Object.keys(route).forEach(verb => {
                             this.express[verb](fullPath, route[verb]);
@@ -40,17 +40,28 @@ class SimpleMVCApp {
     }
 
     initStaticFiles(path) {
-        this.express.use(express.static(path))
+        this.express.use(express.static(path));
     }
 
-    initSessions() {
-        var sessionOptions = {
+    async initSessions() {
+        if (!process.env.SESSION_SECRET) {
+            throw new Error('SESSION_SECRET must be set in the environment');
+        }
+
+        const sessionOptions = {
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: false
         };
-        if (this.useMongoose)
-            sessionOptions.store = new MongoStore({ mongooseConnection: mongoose.connection, collection: 'simple_sessions' });
+
+        if (this.useMongoose) {
+            if (this.dbConnectionPromise)
+                await this.dbConnectionPromise;
+            sessionOptions.store = MongoStore.create({
+                client: mongoose.connection.getClient(),
+                collectionName: 'simple_sessions'
+            });
+        }
 
         this.express.use(session(sessionOptions));
     }
@@ -64,17 +75,24 @@ class SimpleMVCApp {
             MONGO_SERVER,
             MONGO_DB
         } = process.env;
-        const connectionString = `${MONGO_SCHEME}://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_SERVER}/${MONGO_DB}`
-        mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
+        const connectionString = `${MONGO_SCHEME}://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_SERVER}/${MONGO_DB}`;
+        this.dbConnectionPromise = mongoose.connect(connectionString);
+        return this.dbConnectionPromise;
     }
 
     listen(host, port) {
-        try {
-            this.express.listen(parseInt(port || process.env.PORT), host || process.env.HOST);
-            console.log(`SimpleMVC.App is listening on ${host || process.env.HOST} port ${port || process.env.PORT}`);
-        } catch (ex) {
+        const resolvedHost = host || process.env.HOST || 'localhost';
+        const resolvedPort = parseInt(port || process.env.PORT, 10) || 8080;
+
+        const server = this.express.listen(resolvedPort, resolvedHost, () => {
+            console.log(`SimpleMVC.App is listening on ${resolvedHost} port ${resolvedPort}`);
+        });
+
+        server.on('error', (ex) => {
             console.error(ex);
-        }
+        });
+
+        return server;
     }
 }
 

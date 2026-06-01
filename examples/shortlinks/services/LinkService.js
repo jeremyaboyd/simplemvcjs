@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const LinkModel = new mongoose.model('store', {
+const LinkModel = mongoose.model('store', {
     _id: String,
     userId: mongoose.Types.ObjectId,
     url: String,
@@ -15,17 +15,17 @@ function slugify(input = '') {
 }
 
 class LinkService {
-    getLinks({ sort = { createdOn: -1 }, skip = 0, limit = 10 } = {}) {
+    getLinks({ sort = { date: -1 }, skip = 0, limit = 10 } = {}) {
         const query = LinkModel.find();
         if (sort)
-            query.sort(sort)
+            query.sort(sort);
 
         if (skip)
             query.skip(skip);
 
         if (limit)
             query.limit(limit);
-        return query;
+        return query.exec();
     }
 
     async getLink(id) {
@@ -33,8 +33,10 @@ class LinkService {
     }
 
     async clickLink(id) {
-        const link = this.getLink(id);
+        const link = await this.getLink(id);
+        if (!link) return;
         link.clicks.push({});
+        await link.save();
     }
 
     async addLink({ userId, link, url } = {}) {
@@ -49,6 +51,7 @@ class LinkService {
         });
 
         await newLink.save();
+        return true;
     }
 }
 

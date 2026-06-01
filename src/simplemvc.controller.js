@@ -34,9 +34,38 @@ class SimpleMVCRedirectResult {
     }
 }
 
+const SESSION_VIEW_KEYS = ['user', 'admin', 'isAdmin'];
+
+function buildSessionViewModel(session) {
+    if (!session) return {};
+    const vm = {};
+    for (const key of SESSION_VIEW_KEYS) {
+        if (session[key] !== undefined)
+            vm[key] = session[key];
+    }
+    return vm;
+}
+
+function sanitizeViewName(viewName) {
+    const normalized = String(viewName).replace(/\\/g, '/');
+    const segments = normalized.split('/').filter(segment => segment && segment !== '.' && segment !== '..');
+    return segments.join('/');
+}
+
+function isSafeRedirectUrl(url, allowExternalRedirects) {
+    if (!url || typeof url !== 'string')
+        return false;
+    if (allowExternalRedirects)
+        return true;
+    if (!url.startsWith('/') || url.startsWith('//'))
+        return false;
+    return true;
+}
+
 class SimpleMVCController {
     basePath;
     routes = {};
+    allowExternalRedirects = false;
     beforeRoute = function (req) { };
 
     constructor(basePath = "/", routes = {}) {
@@ -62,42 +91,63 @@ class SimpleMVCController {
 
     requestHandler(route) {
         const that = this;
-        
+
         const processResult = (result, req, res) => {
-            res.status(result.status || 200);
             if (result instanceof SimpleMVCViewResult) {
-                //remove slash to make absolute path relative for mustache
-                const viewPath = (that.basePath + result.viewName).substring(1);
+                const viewPath = sanitizeViewName((that.basePath + result.viewName).substring(1));
                 const vm = {
-                    session: req.session,
+                    session: buildSessionViewModel(req.session),
                     model: result.model
                 };
 
+                res.status(result.status || 200);
                 res.render(viewPath, vm);
-            } else if (result instanceof SimpleMVCJsonResult) {
-                res.json(result.data);
-            } else if (result instanceof SimpleMVCTextResult) {
-                res.send(result.content);
-            } else if (result instanceof SimpleMVCRedirectResult) {
-                res.redirect(result.url);
+                return true;
             }
-        }
+            if (result instanceof SimpleMVCJsonResult) {
+                res.status(result.status || 200);
+                res.json(result.data);
+                return true;
+            }
+            if (result instanceof SimpleMVCTextResult) {
+                res.status(result.status || 200);
+                res.send(result.content);
+                return true;
+            }
+            if (result instanceof SimpleMVCRedirectResult) {
+                if (!isSafeRedirectUrl(result.url, that.allowExternalRedirects)) {
+                    res.status(400).send('Invalid redirect URL');
+                    return true;
+                }
+                res.redirect(result.url);
+                return true;
+            }
+            return false;
+        };
 
         return async (req, res) => {
             try {
                 let result = await this.beforeRoute.call(that, req);
                 if (result) {
-                    processResult(result, req, res);
+                    if (!processResult(result, req, res) && !res.headersSent)
+                        res.status(500).send('Internal Server Error');
                     return;
                 }
                 result = await route.call(that, req, res);
-                if (!result) return;
+                if (!result) {
+                    if (!res.headersSent)
+                        res.status(204).end();
+                    return;
+                }
 
-                processResult(result, req, res);
+                if (!processResult(result, req, res) && !res.headersSent)
+                    res.status(500).send('Internal Server Error');
             } catch (ex) {
-                res.status(500).send(ex);
+                console.error(ex);
+                if (!res.headersSent)
+                    res.status(500).send('Internal Server Error');
             }
-        }
+        };
     }
 
     view = (view = "", model = {}, status = 200) => new SimpleMVCViewResult(view, model, status);
@@ -111,3 +161,6 @@ class SimpleMVCController {
 }
 
 module.exports = SimpleMVCController;
+module.exports.buildSessionViewModel = buildSessionViewModel;
+module.exports.isSafeRedirectUrl = isSafeRedirectUrl;
+module.exports.sanitizeViewName = sanitizeViewName;

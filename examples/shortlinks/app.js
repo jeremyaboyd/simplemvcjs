@@ -1,6 +1,4 @@
 const SimpleMVC = require('../../src/simplemvc.js');
-const fs = require('fs');
-const URL = require('url').URL;
 const LinkService = require('./services/LinkService.js');
 
 const membership = new SimpleMVC.Membership();
@@ -13,19 +11,21 @@ const controller = new SimpleMVC.Controller("/", {
         return this.view('index', vm);
     },
     "l/:id": {
-        get: await function (req) {
+        get: async function (req) {
             const link = await links.getLink(req.params.id);
-            return this.redirect(link);
+            if (!link || !link.url)
+                return this.redirect('/');
+            await links.clickLink(req.params.id);
+            return this.redirect(link.url);
         },
         post: async function (req) {
             if (!req.session.user)
                 return this.redirect('/login');
 
-            if (await links.addLink({ userId: req.session.user._id, link: req.fields.link, url: req.fields.url })) {
-                return this.redirect('/');
-            } else {
+            if (await links.addLink({ userId: req.session.user.id, link: req.fields.link, url: req.fields.url })) {
                 return this.redirect('/');
             }
+            return this.redirect('/');
         }
     },
     "login": {
@@ -42,6 +42,9 @@ const controller = new SimpleMVC.Controller("/", {
         }
     },
     "register": {
+        get: function () {
+            return this.view('register');
+        },
         post: async function (req) {
             const user = await membership.addUser(req.fields.email, req.fields.password);
             if (user) {
@@ -59,9 +62,12 @@ const controller = new SimpleMVC.Controller("/", {
     }
 });
 
-loadLinks();
-const app = new SimpleMVC.App();
-app.addControllers(controller);
-app.initDbConnection();
-app.initSessions();
-app.listen();
+controller.allowExternalRedirects = true;
+
+(async () => {
+    const app = new SimpleMVC.App();
+    app.addControllers(controller);
+    app.initDbConnection();
+    await app.initSessions();
+    app.listen();
+})();

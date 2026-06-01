@@ -39,7 +39,7 @@ const sortByDateDesc = (a, b) => {
 const blogController = new SimpleMVC.Controller("/", {
     "": {
         get: function () {
-            const recentPosts = posts.sort(sortByDateDesc);
+            const recentPosts = [...posts].sort(sortByDateDesc);
             recentPosts.forEach(p => p.date_formatted = moment(p.date).format('MMMM Do YYYY hh:mm a'));
             return this.view('index', { posts: recentPosts, title: "My Blog" });
         }
@@ -53,7 +53,7 @@ const blogController = new SimpleMVC.Controller("/", {
         const authorPosts = posts
             .filter(p => p.author.slug === req.params.id)
             .sort(sortByDateDesc);
-        authorPosts.forEach(p => p.date_formatted == moment(p.date).format('MMMM Do YYYY hh:mm a'));
+        authorPosts.forEach(p => p.date_formatted = moment(p.date).format('MMMM Do YYYY hh:mm a'));
         return this.view('index', { posts: authorPosts, title: authorPosts[0].author.name });
     },
     "about": function () {
@@ -79,17 +79,17 @@ const authController = new SimpleMVC.Controller("/auth/", {
         },
         post: async function (req) {
             if (await bcrypt.compare(req.fields.password, process.env.ADMIN_PASSWORD)) {
-                console.log("post compared");
+                req.session.isAdmin = true;
                 return this.redirect('/admin');
             }
-            return this.view('login', { err: "WRONG PASSWORD BOY-O   " + (await bcrypt.hash(req.fields.password, 10)) });
+            return this.view('login', { err: "Invalid password. Please try again." });
         }
     }
-})
+});
 authController.beforeRoute = function (req) {
-    if (req.session.admin)
+    if (req.session.isAdmin)
         return this.redirect('/admin');
-}
+};
 
 const adminController = new SimpleMVC.Controller("/admin/", {
     "": function() {
@@ -102,8 +102,10 @@ adminController.beforeRoute = function(req) {
         return this.redirect('/auth');
 };
 
-const app = new SimpleMVC.App();
-app.initSessions();
-app.addControllers(blogController, authController);
-app.initStaticFiles('static');
-app.listen();
+(async () => {
+    const app = new SimpleMVC.App();
+    await app.initSessions();
+    app.addControllers(blogController, authController, adminController);
+    app.initStaticFiles('static');
+    app.listen();
+})();

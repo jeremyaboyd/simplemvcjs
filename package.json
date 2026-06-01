@@ -4,7 +4,7 @@
   "description": "A highly opinionated MVC micro web-framework.",
   "main": "./src/simplemvc.js",
   "scripts": {
-    "test": "node --test test/**/*.test.js"
+    "test": "node --test test/*.test.js"
   },
   "engines": {
     "node": ">=18.0.0"

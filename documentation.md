@@ -1,5 +1,5 @@
 # SimpleMVC.js Documentation
-This documentation targets SimpleMVC.js **0.10.1+**. Copy [`.env.example`](.env.example) when configuring a new application.
+This documentation targets SimpleMVC.js **0.10.2+**. Copy [`.env.example`](.env.example) when configuring a new application.
 
 ### Adding the SimpleMVC package to your application
 1. Install the `simplemvcjs` package from npm (or download it manually).
@@ -240,3 +240,86 @@ Attempts to activate the user's account by matching the `activationCode` paramet
     }
 ...
 ```
+
+## SimpleMVC.Stripe
+The Stripe service wraps [Checkout Sessions](https://docs.stripe.com/payments/checkout) for one-time and subscription payments. It follows Stripe best practices: hosted Checkout, dynamic payment methods (no `payment_method_types` in API calls), and verified webhooks.
+
+>NOTE: Requires `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` in the environment. Prefer a [restricted API key](https://docs.stripe.com/keys/restricted-api-keys) (`rk_`) with only the permissions your app needs over a full secret key (`sk_`).
+
+### Environment variables
+| Variable | Purpose |
+|----------|---------|
+| `STRIPE_SECRET_KEY` | Server-side API key (test or live) |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret from your Stripe webhook endpoint |
+
+### `Stripe.createCheckoutSession(options)`
+Creates a hosted Checkout Session and returns `{ id, url }`. Redirect the user to `url` to complete payment.
+
+Options:
+- `mode` — `'payment'` (default) or `'subscription'`
+- `lineItems` — `[{ price: 'price_...', quantity: 1 }]`
+- `successUrl`, `cancelUrl` — required; use `{CHECKOUT_SESSION_ID}` in `successUrl` to retrieve the session later
+- `customerEmail`, `customerId`, `clientReferenceId`, `metadata` — optional
+- `subscriptionData` — optional, e.g. `{ trial_period_days: 14 }` when `mode` is `'subscription'`
+
+Set `allowExternalRedirects = true` on your controller to redirect to Stripe-hosted Checkout.
+
+```js
+const stripe = new SimpleMVC.Stripe();
+
+const controller = new SimpleMVC.Controller('/', {
+    'checkout': {
+        post: async function (req) {
+            const session = await stripe.createCheckoutSession({
+                lineItems: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+                successUrl: `${process.env.APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancelUrl: `${process.env.APP_URL}/pricing`,
+                clientReferenceId: String(req.session.user?.id),
+                metadata: { userId: String(req.session.user?.id) }
+            });
+            return this.redirect(session.url);
+        }
+    },
+    'success': async function (req) {
+        const session = await stripe.getCheckoutSession(req.query.session_id);
+        return this.view('success', { sessionId: session.id, status: session.payment_status });
+    }
+});
+controller.allowExternalRedirects = true;
+```
+
+### Subscription checkout
+```js
+const session = await stripe.createCheckoutSession({
+    mode: 'subscription',
+    lineItems: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+    successUrl: `${process.env.APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancelUrl: `${process.env.APP_URL}/pricing`,
+    subscriptionData: { trial_period_days: 14 }
+});
+```
+
+### `Stripe.getCheckoutSession(sessionId, options)`
+Retrieves a Checkout Session (e.g. on your success page). Pass `expand: ['line_items']` to include line item details.
+
+### Webhooks
+Register the webhook route on the App **before** `listen()`. The App skips body parsing on this path so Stripe signature verification works.
+
+```js
+const stripe = new SimpleMVC.Stripe();
+const app = new SimpleMVC.App();
+
+app.registerStripeWebhook('/webhooks/stripe', stripe.createWebhookHandler({
+    'checkout.session.completed': async (event) => {
+        const session = event.data.object;
+        // Fulfill order using session.metadata or client_reference_id
+    }
+}));
+
+app.addControllers(controller);
+await app.initSessions();
+app.listen();
+```
+
+### `Stripe.verifyWebhook(rawBody, signature)`
+Low-level signature verification. Returns the parsed Stripe Event. Used internally by `createWebhookHandler`.

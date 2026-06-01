@@ -14,10 +14,16 @@ const SimpleMVCController = require('./simplemvc.controller.js');
 
 class SimpleMVCApp {
     __dirname = require('path').resolve();
+    rawWebhookPaths = new Set();
+
     constructor() {
         this.express = express();
 
-        this.express.use(formidable());
+        this.express.use((req, res, next) => {
+            if (this.rawWebhookPaths.has(req.path))
+                return next();
+            return formidable()(req, res, next);
+        });
         this.express.use(cookieParser());
 
         this.express.engine('html', mustache());
@@ -45,6 +51,11 @@ class SimpleMVCApp {
 
     initStaticFiles(path) {
         this.express.use(express.static(path));
+    }
+
+    registerStripeWebhook(path, handler) {
+        this.rawWebhookPaths.add(path);
+        this.express.post(path, express.raw({ type: 'application/json' }), handler);
     }
 
     async initSessions() {

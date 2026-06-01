@@ -10,7 +10,7 @@ A highly opinionated MVC micro web-framework for Node.js
     Routing, views, SQL (Sequelize), sessions, Membership activation, and SMTP.
 3. Simple SaaS - Coming Soon
 
-    Planned example using all parts of the SimpleMVC library.
+    Planned example using Membership, Stripe Checkout, and subscriptions.
 
 ## Quick Start
 This quick start assumes atleast a base familiarity with Node.js, NPM, and how to build a website.

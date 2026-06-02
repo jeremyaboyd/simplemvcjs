@@ -1,6 +1,7 @@
 const PLANS = {
     free: {
         key: 'free',
+        rank: 0,
         name: 'Free',
         priceEnv: null,
         price: '$0',
@@ -8,6 +9,7 @@ const PLANS = {
     },
     basic: {
         key: 'basic',
+        rank: 1,
         name: 'Basic',
         priceEnv: 'STRIPE_PRICE_BASIC',
         price: '$9/mo',
@@ -15,6 +17,7 @@ const PLANS = {
     },
     pro: {
         key: 'pro',
+        rank: 2,
         name: 'Pro',
         priceEnv: 'STRIPE_PRICE_PRO',
         price: '$29/mo',

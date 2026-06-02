@@ -34,6 +34,9 @@
                 {{#showSubscribe}}
                 <form method="post" action="/checkout/{{key}}"><button type="submit" class="button">Subscribe</button></form>
                 {{/showSubscribe}}
+                {{#showManageOnAccount}}
+                <p class="muted">Already subscribed? <a href="/account">Change plans from account</a>.</p>
+                {{/showManageOnAccount}}
             </div>
             {{/model.plans}}
         </div>

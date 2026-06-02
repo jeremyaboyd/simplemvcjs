@@ -23,6 +23,33 @@
         <p class="muted">This demo has no real product features — your plan is stored for billing demo purposes only.</p>
         {{/model.hasPaidPlan}}
 
+        {{#model.pendingPlan}}
+        <p class="notice">Pending change: switch to <strong>{{model.pendingPlan}}</strong> at {{model.pendingPlanEffective}}.</p>
+        {{/model.pendingPlan}}
+
+        {{#model.hasPlanChanges}}
+        <section>
+            <h2>Change plan</h2>
+            <ul>
+                {{#model.planChanges}}
+                <li>
+                    <strong>{{name}}</strong> ({{price}})
+                    {{#isUpgrade}}
+                    <form method="post" action="/account/upgrade/{{key}}" class="inline-form">
+                        <button type="submit" class="button">Upgrade now (prorated)</button>
+                    </form>
+                    {{/isUpgrade}}
+                    {{#isDowngrade}}
+                    <form method="post" action="/account/downgrade/{{key}}" class="inline-form">
+                        <button type="submit" class="button">Downgrade at period end</button>
+                    </form>
+                    {{/isDowngrade}}
+                </li>
+                {{/model.planChanges}}
+            </ul>
+        </section>
+        {{/model.hasPlanChanges}}
+
         {{#model.canCancel}}
         <form method="post" action="/account/cancel" onsubmit="return confirm('Cancel your subscription at period end?');">
             <button type="submit" class="button button-danger">Cancel subscription</button>

@@ -73,6 +73,74 @@ class SimpleMVCStripe {
         });
     }
 
+    async getSubscription(subscriptionId, { expand = [] } = {}) {
+        if (!subscriptionId)
+            throw new Error('subscriptionId is required');
+
+        return this.getClient().subscriptions.retrieve(subscriptionId, {
+            expand: expand.length ? expand : undefined
+        });
+    }
+
+    async updateSubscriptionPrice(subscriptionId, {
+        subscriptionItemId,
+        newPriceId,
+        prorationBehavior = 'create_prorations',
+        billingCycleAnchor = 'unchanged'
+    } = {}) {
+        if (!subscriptionId)
+            throw new Error('subscriptionId is required');
+        if (!newPriceId)
+            throw new Error('newPriceId is required');
+
+        let itemId = subscriptionItemId;
+        if (!itemId) {
+            const subscription = await this.getSubscription(subscriptionId);
+            itemId = subscription?.items?.data?.[0]?.id;
+        }
+        if (!itemId)
+            throw new Error('subscriptionItemId is required');
+
+        return this.getClient().subscriptions.update(subscriptionId, {
+            items: [{ id: itemId, price: newPriceId }],
+            proration_behavior: prorationBehavior,
+            billing_cycle_anchor: billingCycleAnchor
+        });
+    }
+
+    async scheduleSubscriptionPriceChange(subscriptionId, { newPriceId } = {}) {
+        if (!subscriptionId)
+            throw new Error('subscriptionId is required');
+        if (!newPriceId)
+            throw new Error('newPriceId is required');
+
+        const client = this.getClient();
+        const subscription = await this.getSubscription(subscriptionId);
+        const currentItem = subscription?.items?.data?.[0];
+        if (!currentItem?.price?.id)
+            throw new Error('subscriptionItemId is required');
+
+        const schedule = await client.subscriptionSchedules.create({
+            from_subscription: subscriptionId
+        });
+
+        const currentEnd = subscription.current_period_end;
+        return client.subscriptionSchedules.update(schedule.id, {
+            end_behavior: 'release',
+            phases: [
+                {
+                    start_date: subscription.current_period_start,
+                    end_date: currentEnd,
+                    items: [{ price: currentItem.price.id, quantity: currentItem.quantity || 1 }]
+                },
+                {
+                    start_date: currentEnd,
+                    items: [{ price: newPriceId, quantity: currentItem.quantity || 1 }]
+                }
+            ]
+        });
+    }
+
     async cancelSubscription(subscriptionId, { cancelAtPeriodEnd = true } = {}) {
         if (!subscriptionId)
             throw new Error('subscriptionId is required');

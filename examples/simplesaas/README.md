@@ -36,9 +36,13 @@ Or `npm start`.
 
 Register a user (Free tier by default), subscribe from **Pricing**, and manage billing on **Account**. Log in with `ADMIN_EMAIL` to open **Admin** and list or maintain users.
 
+Plan-change behavior in this demo:
+
+- **Upgrade** (Basic -> Pro) happens immediately with proration.
+- **Downgrade** (Pro -> Basic) is scheduled for period end.
+
 ## Demo limitations
 
-- No upgrades between Basic and Pro (cancel first, or use admin plan override).
 - No Stripe Customer Portal.
 - Admin plan changes do not sync with Stripe.
 - No email verification or password reset.

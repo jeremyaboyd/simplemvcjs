@@ -305,6 +305,44 @@ const session = await stripe.createCheckoutSession({
 ### `Stripe.getCheckoutSession(sessionId, options)`
 Retrieves a Checkout Session (e.g. on your success page). Pass `expand: ['line_items']` to include line item details.
 
+### `Stripe.getSubscription(subscriptionId, options)`
+Retrieves a Subscription. Pass `expand` to include nested objects such as `items.data.price`.
+
+```js
+const subscription = await stripe.getSubscription(subscriptionId, {
+    expand: ['items.data.price']
+});
+```
+
+### `Stripe.updateSubscriptionPrice(subscriptionId, options)`
+Updates an active subscription item's price immediately. This is useful for instant upgrades.
+
+Options:
+- `subscriptionItemId` - optional (auto-detected from first item if omitted)
+- `newPriceId` - required
+- `prorationBehavior` - defaults to `'create_prorations'`
+- `billingCycleAnchor` - defaults to `'unchanged'`
+
+```js
+await stripe.updateSubscriptionPrice(subscriptionId, {
+    newPriceId: process.env.STRIPE_PRICE_PRO,
+    prorationBehavior: 'create_prorations',
+    billingCycleAnchor: 'unchanged'
+});
+```
+
+### `Stripe.scheduleSubscriptionPriceChange(subscriptionId, options)`
+Schedules a subscription price change for the next billing cycle using Subscription Schedules. This is useful for end-of-cycle downgrades.
+
+Options:
+- `newPriceId` - required
+
+```js
+await stripe.scheduleSubscriptionPriceChange(subscriptionId, {
+    newPriceId: process.env.STRIPE_PRICE_BASIC
+});
+```
+
 ### `Stripe.cancelSubscription(subscriptionId, options)`
 Cancels a subscription. By default (`cancelAtPeriodEnd: true`) the subscription remains active until the end of the billing period. Pass `cancelAtPeriodEnd: false` to cancel immediately.
 

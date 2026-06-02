@@ -22,6 +22,23 @@ function isAdminEmail(email) {
     return adminEmail && email === adminEmail;
 }
 
+function buildAccountViewModel(user) {
+    const plan = subscriptions.getPlan(user);
+    const planChanges = subscriptions.getAvailablePlanChanges(user);
+    return {
+        user,
+        plan,
+        planDetails: PLANS[plan] || PLANS.free,
+        subscriptionStatus: user.profile?.subscriptionStatus || '-',
+        pendingPlan: user.profile?.pendingPlan || '',
+        pendingPlanEffective: user.profile?.pendingPlanEffective || '',
+        canCancel: subscriptions.canCancel(user),
+        hasPaidPlan: subscriptions.hasActivePaidPlan(user),
+        hasPlanChanges: planChanges.length > 0,
+        planChanges
+    };
+}
+
 const mainController = new SimpleMVC.Controller('/', {
     '': function () {
         return this.view('index', { plans: planList });
@@ -30,14 +47,16 @@ const mainController = new SimpleMVC.Controller('/', {
         await refreshSessionUser(req);
         const currentPlan = req.session.user ? subscriptions.getPlan(req.session.user) : null;
         const canSubscribe = req.session.user && currentPlan === 'free';
+        const hasPaidPlan = req.session.user ? subscriptions.hasActivePaidPlan(req.session.user) : false;
         const plans = planList.map(plan => ({
             ...plan,
             isCurrent: plan.key === currentPlan,
             showSubscribe: canSubscribe && plan.key !== 'free',
             showRegister: !req.session.user && plan.key === 'free',
-            showLogin: !req.session.user && plan.key !== 'free'
+            showLogin: !req.session.user && plan.key !== 'free',
+            showManageOnAccount: hasPaidPlan && !canSubscribe && plan.key !== currentPlan
         }));
-        return this.view('pricing', { plans, currentPlan });
+        return this.view('pricing', { plans, currentPlan, hasPaidPlan });
     },
     'register': {
         get: function () {
@@ -93,16 +112,7 @@ const mainController = new SimpleMVC.Controller('/', {
 const protectedController = new SimpleMVC.Controller('/', {
     'account': async function (req) {
         await refreshSessionUser(req);
-        const user = req.session.user;
-        const plan = subscriptions.getPlan(user);
-        return this.view('account', {
-            user,
-            plan,
-            planDetails: PLANS[plan] || PLANS.free,
-            subscriptionStatus: user.profile?.subscriptionStatus || '—',
-            canCancel: subscriptions.canCancel(user),
-            hasPaidPlan: subscriptions.hasActivePaidPlan(user)
-        });
+        return this.view('account', buildAccountViewModel(req.session.user));
     },
     'checkout/basic': {
         post: async function (req) {
@@ -130,13 +140,36 @@ const protectedController = new SimpleMVC.Controller('/', {
                 await subscriptions.cancelRebill(req.session.user.id);
                 await refreshSessionUser(req);
                 return this.view('account', {
-                    user: req.session.user,
-                    plan: subscriptions.getPlan(req.session.user),
-                    planDetails: PLANS[subscriptions.getPlan(req.session.user)] || PLANS.free,
-                    subscriptionStatus: req.session.user.profile?.subscriptionStatus || '—',
-                    canCancel: subscriptions.canCancel(req.session.user),
-                    hasPaidPlan: subscriptions.hasActivePaidPlan(req.session.user),
+                    ...buildAccountViewModel(req.session.user),
                     message: { color: 'green', text: 'Your subscription will cancel at the end of the billing period.' }
+                });
+            } catch (ex) {
+                return this.redirect('/account');
+            }
+        }
+    },
+    'account/upgrade/:plan': {
+        post: async function (req) {
+            try {
+                await subscriptions.changePlanNow(req.session.user.id, req.params.plan);
+                await refreshSessionUser(req);
+                return this.view('account', {
+                    ...buildAccountViewModel(req.session.user),
+                    message: { color: 'green', text: 'Plan upgraded immediately with proration.' }
+                });
+            } catch (ex) {
+                return this.redirect('/account');
+            }
+        }
+    },
+    'account/downgrade/:plan': {
+        post: async function (req) {
+            try {
+                await subscriptions.schedulePlanDowngrade(req.session.user.id, req.params.plan);
+                await refreshSessionUser(req);
+                return this.view('account', {
+                    ...buildAccountViewModel(req.session.user),
+                    message: { color: 'green', text: 'Downgrade scheduled for the end of your billing period.' }
                 });
             } catch (ex) {
                 return this.redirect('/account');

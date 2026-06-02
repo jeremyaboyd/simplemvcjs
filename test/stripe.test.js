@@ -93,6 +93,126 @@ describe('SimpleMVCStripe', () => {
         });
     });
 
+    it('getSubscription retrieves subscription by id', async () => {
+        let capturedId;
+        let capturedOptions;
+        const stripe = new SimpleMVCStripe({
+            subscriptions: {
+                retrieve: async (id, options) => {
+                    capturedId = id;
+                    capturedOptions = options;
+                    return { id, items: { data: [] } };
+                }
+            }
+        });
+
+        const sub = await stripe.getSubscription('sub_abc', { expand: ['items.data.price'] });
+        assert.equal(sub.id, 'sub_abc');
+        assert.equal(capturedId, 'sub_abc');
+        assert.deepEqual(capturedOptions, { expand: ['items.data.price'] });
+    });
+
+    it('getSubscription throws when subscriptionId is missing', async () => {
+        const stripe = new SimpleMVCStripe({ subscriptions: { retrieve: async () => ({}) } });
+        await assert.rejects(() => stripe.getSubscription(''), /subscriptionId/);
+    });
+
+    it('updateSubscriptionPrice updates subscription with proration defaults', async () => {
+        let capturedUpdate;
+        const stripe = new SimpleMVCStripe({
+            subscriptions: {
+                retrieve: async () => ({ items: { data: [{ id: 'si_123' }] } }),
+                update: async (id, params) => {
+                    capturedUpdate = { id, params };
+                    return { id, ...params };
+                }
+            }
+        });
+
+        await stripe.updateSubscriptionPrice('sub_123', { newPriceId: 'price_pro' });
+        assert.deepEqual(capturedUpdate, {
+            id: 'sub_123',
+            params: {
+                items: [{ id: 'si_123', price: 'price_pro' }],
+                proration_behavior: 'create_prorations',
+                billing_cycle_anchor: 'unchanged'
+            }
+        });
+    });
+
+    it('updateSubscriptionPrice respects explicit item and options', async () => {
+        let capturedUpdate;
+        const stripe = new SimpleMVCStripe({
+            subscriptions: {
+                retrieve: async () => ({ items: { data: [] } }),
+                update: async (id, params) => {
+                    capturedUpdate = { id, params };
+                    return { id, ...params };
+                }
+            }
+        });
+
+        await stripe.updateSubscriptionPrice('sub_321', {
+            subscriptionItemId: 'si_999',
+            newPriceId: 'price_basic',
+            prorationBehavior: 'none',
+            billingCycleAnchor: 'now'
+        });
+        assert.deepEqual(capturedUpdate, {
+            id: 'sub_321',
+            params: {
+                items: [{ id: 'si_999', price: 'price_basic' }],
+                proration_behavior: 'none',
+                billing_cycle_anchor: 'now'
+            }
+        });
+    });
+
+    it('updateSubscriptionPrice throws when newPriceId is missing', async () => {
+        const stripe = new SimpleMVCStripe({
+            subscriptions: { retrieve: async () => ({ items: { data: [{ id: 'si_123' }] } }), update: async () => ({}) }
+        });
+        await assert.rejects(() => stripe.updateSubscriptionPrice('sub_123', {}), /newPriceId/);
+    });
+
+    it('scheduleSubscriptionPriceChange creates and updates subscription schedule', async () => {
+        let scheduleCreateParams;
+        let scheduleUpdate;
+        const stripe = new SimpleMVCStripe({
+            subscriptions: {
+                retrieve: async () => ({
+                    current_period_start: 1700000000,
+                    current_period_end: 1702592000,
+                    items: { data: [{ price: { id: 'price_basic' }, quantity: 1 }] }
+                })
+            },
+            subscriptionSchedules: {
+                create: async (params) => {
+                    scheduleCreateParams = params;
+                    return { id: 'sub_sched_123' };
+                },
+                update: async (id, params) => {
+                    scheduleUpdate = { id, params };
+                    return { id, ...params };
+                }
+            }
+        });
+
+        await stripe.scheduleSubscriptionPriceChange('sub_123', { newPriceId: 'price_pro' });
+        assert.deepEqual(scheduleCreateParams, { from_subscription: 'sub_123' });
+        assert.equal(scheduleUpdate.id, 'sub_sched_123');
+        assert.equal(scheduleUpdate.params.end_behavior, 'release');
+        assert.equal(scheduleUpdate.params.phases[1].items[0].price, 'price_pro');
+    });
+
+    it('scheduleSubscriptionPriceChange throws when newPriceId is missing', async () => {
+        const stripe = new SimpleMVCStripe({
+            subscriptions: { retrieve: async () => ({ items: { data: [{ price: { id: 'price_basic' } }] } }) },
+            subscriptionSchedules: { create: async () => ({ id: 'sub_sched_123' }), update: async () => ({}) }
+        });
+        await assert.rejects(() => stripe.scheduleSubscriptionPriceChange('sub_123', {}), /newPriceId/);
+    });
+
     it('cancelSubscription sets cancel_at_period_end by default', async () => {
         let capturedId;
         let capturedParams;

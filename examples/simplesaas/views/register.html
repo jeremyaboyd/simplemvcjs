@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register — Simple SaaS</title>
+    {{>shared/head}}
+</head>
+<body>
+    {{>shared/nav}}
+    <main>
+        <h1>Register</h1>
+        {{#model.message}}<p class="message message-{{color}}">{{text}}</p>{{/model.message}}
+        <form method="post" action="/register">
+            <p><label>Email<br><input type="email" name="email" required></label></p>
+            <p><label>Password<br><input type="password" name="password" required></label></p>
+            <button type="submit" class="button">Create account</button>
+        </form>
+        <p>Already have an account? <a href="/login">Log in</a></p>
+    </main>
+</body>
+</html>

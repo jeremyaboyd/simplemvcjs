@@ -1,0 +1,18 @@
+<nav class="nav">
+    <a href="/">Simple SaaS</a>
+    <span class="nav-links">
+        <a href="/">Home</a>
+        <a href="/pricing">Pricing</a>
+        {{#session.user}}
+        <a href="/account">Account</a>
+        <a href="/logout">Logout</a>
+        {{/session.user}}
+        {{^session.user}}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+        {{/session.user}}
+        {{#session.isAdmin}}
+        <a href="/admin">Admin</a>
+        {{/session.isAdmin}}
+    </span>
+</nav>

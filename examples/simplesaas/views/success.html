@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Success — Simple SaaS</title>
+    {{>shared/head}}
+</head>
+<body>
+    {{>shared/nav}}
+    <main>
+        <h1>Checkout complete</h1>
+        <p>Thank you! Your payment status is <strong>{{model.status}}</strong>.</p>
+        {{#model.plan}}<p>Plan: <strong>{{.}}</strong></p>{{/model.plan}}
+        <p><a class="button" href="/account">Go to your account</a></p>
+    </main>
+</body>
+</html>

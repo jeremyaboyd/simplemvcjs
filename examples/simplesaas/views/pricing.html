@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pricing — Simple SaaS</title>
+    {{>shared/head}}
+</head>
+<body>
+    {{>shared/nav}}
+    <main>
+        <h1>Pricing</h1>
+        {{#model.currentPlan}}
+        <p class="notice">You are on the <strong>{{.}}</strong> plan. <a href="/account">Manage account</a></p>
+        {{/model.currentPlan}}
+
+        <div class="plan-grid">
+            {{#model.plans}}
+            <div class="plan-card{{#isCurrent}} plan-current{{/isCurrent}}">
+                <h2>{{name}}</h2>
+                <p class="price">{{price}}</p>
+                <ul>
+                    {{#features}}
+                    <li>{{.}}</li>
+                    {{/features}}
+                </ul>
+                {{#isCurrent}}
+                <p class="badge">Current plan</p>
+                {{/isCurrent}}
+                {{#showRegister}}
+                <p><a class="button" href="/register">Register free</a></p>
+                {{/showRegister}}
+                {{#showLogin}}
+                <p><a class="button" href="/login">Log in to subscribe</a></p>
+                {{/showLogin}}
+                {{#showSubscribe}}
+                <form method="post" action="/checkout/{{key}}"><button type="submit" class="button">Subscribe</button></form>
+                {{/showSubscribe}}
+            </div>
+            {{/model.plans}}
+        </div>
+    </main>
+</body>
+</html>

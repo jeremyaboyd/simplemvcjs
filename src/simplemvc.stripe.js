@@ -73,6 +73,17 @@ class SimpleMVCStripe {
         });
     }
 
+    async cancelSubscription(subscriptionId, { cancelAtPeriodEnd = true } = {}) {
+        if (!subscriptionId)
+            throw new Error('subscriptionId is required');
+
+        const client = this.getClient();
+        if (cancelAtPeriodEnd)
+            return client.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
+
+        return client.subscriptions.cancel(subscriptionId);
+    }
+
     verifyWebhook(rawBody, signature) {
         const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
         if (!webhookSecret)

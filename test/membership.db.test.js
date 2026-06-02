@@ -52,6 +52,17 @@ describe('SimpleMVC.Membership database', () => {
         assert.ok(user.profile.activatedOn);
     });
 
+    it('listUsers returns users without passwords', async () => {
+        await membership.addUser('other@example.com', 'password456', { name: 'Other' });
+        const users = await membership.listUsers();
+        assert.ok(users.length >= 2);
+        for (const user of users) {
+            assert.equal(typeof user.id, 'number');
+            assert.ok(user.email);
+            assert.equal(user.password, undefined);
+        }
+    });
+
     it('deleteUser removes the user', async () => {
         const user = await membership.getUserByEmail('test@example.com');
         await membership.deleteUser(user.id);

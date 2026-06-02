@@ -93,6 +93,56 @@ describe('SimpleMVCStripe', () => {
         });
     });
 
+    it('cancelSubscription sets cancel_at_period_end by default', async () => {
+        let capturedId;
+        let capturedParams;
+        const mockClient = {
+            subscriptions: {
+                update: async (id, params) => {
+                    capturedId = id;
+                    capturedParams = params;
+                    return { id, cancel_at_period_end: true, status: 'active' };
+                },
+                cancel: async () => {
+                    throw new Error('cancel should not be called');
+                }
+            }
+        };
+
+        const stripe = new SimpleMVCStripe(mockClient);
+        const subscription = await stripe.cancelSubscription('sub_123');
+
+        assert.equal(capturedId, 'sub_123');
+        assert.deepEqual(capturedParams, { cancel_at_period_end: true });
+        assert.equal(subscription.cancel_at_period_end, true);
+    });
+
+    it('cancelSubscription cancels immediately when cancelAtPeriodEnd is false', async () => {
+        let capturedId;
+        const mockClient = {
+            subscriptions: {
+                update: async () => {
+                    throw new Error('update should not be called');
+                },
+                cancel: async (id) => {
+                    capturedId = id;
+                    return { id, status: 'canceled' };
+                }
+            }
+        };
+
+        const stripe = new SimpleMVCStripe(mockClient);
+        const subscription = await stripe.cancelSubscription('sub_456', { cancelAtPeriodEnd: false });
+
+        assert.equal(capturedId, 'sub_456');
+        assert.equal(subscription.status, 'canceled');
+    });
+
+    it('cancelSubscription throws when subscriptionId is missing', async () => {
+        const stripe = new SimpleMVCStripe({ subscriptions: { update: async () => ({}), cancel: async () => ({}) } });
+        await assert.rejects(() => stripe.cancelSubscription(''), /subscriptionId/);
+    });
+
     it('getClient throws when STRIPE_SECRET_KEY is missing', () => {
         delete process.env.STRIPE_SECRET_KEY;
         const stripe = new SimpleMVCStripe();

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account — Simple SaaS</title>
+    {{>shared/head}}
+</head>
+<body>
+    {{>shared/nav}}
+    <main>
+        <h1>Your account</h1>
+        {{#model.message}}<p class="message message-{{color}}">{{text}}</p>{{/model.message}}
+
+        <dl class="details">
+            <dt>Email</dt>
+            <dd>{{model.user.email}}</dd>
+            <dt>Plan</dt>
+            <dd>{{model.planDetails.name}} ({{model.planDetails.price}})</dd>
+            <dt>Subscription status</dt>
+            <dd>{{model.subscriptionStatus}}</dd>
+        </dl>
+
+        {{#model.hasPaidPlan}}
+        <p class="muted">This demo has no real product features — your plan is stored for billing demo purposes only.</p>
+        {{/model.hasPaidPlan}}
+
+        {{#model.canCancel}}
+        <form method="post" action="/account/cancel" onsubmit="return confirm('Cancel your subscription at period end?');">
+            <button type="submit" class="button button-danger">Cancel subscription</button>
+        </form>
+        {{/model.canCancel}}
+
+        {{^model.hasPaidPlan}}
+        <p><a class="button" href="/pricing">Upgrade your plan</a></p>
+        {{/model.hasPaidPlan}}
+    </main>
+</body>
+</html>

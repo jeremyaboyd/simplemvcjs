@@ -98,6 +98,11 @@ class SimpleMVCMembership {
         await this.userModel.destroy({ where: { id } });
     }
 
+    async listUsers({ limit = 100, offset = 0 } = {}) {
+        const users = await this.userModel.findAll({ limit, offset, order: [['id', 'ASC']] });
+        return users.map(user => this.convertUser(user));
+    }
+
     async sendActivationEmail(id, from, subject, template) {
         const user = await this.getUser(id);
         if (!user) return false;

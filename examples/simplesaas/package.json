@@ -1,15 +1,12 @@
 {
   "name": "simplesaas",
   "version": "1.0.0",
-  "description": "",
+  "description": "SimpleMVC.js SaaS demo with Stripe subscriptions",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "simplemvcjs": "^0.10.1"
-  }
+  "license": "ISC"
 }

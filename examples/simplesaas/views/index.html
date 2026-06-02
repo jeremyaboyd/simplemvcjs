@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple SaaS</title>
+    {{>shared/head}}
+</head>
+<body>
+    {{>shared/nav}}
+    <main>
+        <h1>Simple SaaS Demo</h1>
+        <p>A minimal subscription demo built with SimpleMVC.js, Membership, and Stripe Checkout.</p>
+        <p>This app has no real product features — it exists to show free, Basic, and Pro tiers with billing and admin tools.</p>
+        <p><a class="button" href="/pricing">View pricing</a></p>
+
+        <h2>Plans at a glance</h2>
+        <div class="plan-grid">
+            {{#model.plans}}
+            <div class="plan-card">
+                <h3>{{name}}</h3>
+                <p class="price">{{price}}</p>
+                <ul>
+                    {{#features}}
+                    <li>{{.}}</li>
+                    {{/features}}
+                </ul>
+            </div>
+            {{/model.plans}}
+        </div>
+    </main>
+</body>
+</html>

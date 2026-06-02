@@ -1,0 +1,162 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    margin: 0;
+    color: #1a1a1a;
+    background: #f6f7f9;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: #1e293b;
+    color: #fff;
+}
+
+.nav a {
+    color: #e2e8f0;
+    text-decoration: none;
+    margin-left: 1rem;
+}
+
+.nav > a:first-child {
+    margin-left: 0;
+    font-weight: 700;
+    color: #fff;
+}
+
+main {
+    max-width: 960px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+h1, h2, h3 {
+    margin-top: 0;
+}
+
+.button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #2563eb;
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.button-danger {
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 0.35rem 0.75rem;
+    cursor: pointer;
+}
+
+.plan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.plan-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+
+.plan-current {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb;
+}
+
+.price {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.badge {
+    display: inline-block;
+    background: #dbeafe;
+    color: #1d4ed8;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+}
+
+.message-red {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.message-green {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.notice {
+    background: #fff;
+    border-left: 4px solid #2563eb;
+    padding: 0.75rem 1rem;
+}
+
+.muted {
+    color: #64748b;
+}
+
+.details dt {
+    font-weight: 600;
+    margin-top: 0.75rem;
+}
+
+.details dd {
+    margin: 0.25rem 0 0;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.user-table th,
+.user-table td {
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.user-table th {
+    background: #f1f5f9;
+}
+
+.inline-form {
+    display: inline-block;
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+input, select {
+    padding: 0.35rem 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+ul {
+    padding-left: 1.25rem;
+}

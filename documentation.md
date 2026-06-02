@@ -197,6 +197,9 @@ Retrieve a user from the collection by their id.
 ### `Membership.getUserByEmail(email)`
 Retrieve a user from the collection by their email.
 
+### `Membership.listUsers({ limit, offset })`
+Returns an array of users (without passwords). Defaults to `limit: 100`, `offset: 0`.
+
 ### `Membership.updateUserEmail(id, email)`
 Updates the user's email.
 
@@ -301,6 +304,14 @@ const session = await stripe.createCheckoutSession({
 
 ### `Stripe.getCheckoutSession(sessionId, options)`
 Retrieves a Checkout Session (e.g. on your success page). Pass `expand: ['line_items']` to include line item details.
+
+### `Stripe.cancelSubscription(subscriptionId, options)`
+Cancels a subscription. By default (`cancelAtPeriodEnd: true`) the subscription remains active until the end of the billing period. Pass `cancelAtPeriodEnd: false` to cancel immediately.
+
+```js
+await stripe.cancelSubscription(subscriptionId);
+await stripe.cancelSubscription(subscriptionId, { cancelAtPeriodEnd: false });
+```
 
 ### Webhooks
 Register the webhook route on the App **before** `listen()`. The App skips body parsing on this path so Stripe signature verification works.

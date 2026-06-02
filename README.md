@@ -8,9 +8,9 @@ A highly opinionated MVC micro web-framework for Node.js
 2. [Shortlinker](https://github.com/jeremyaboyd/simplemvcjs/tree/master/examples/shortlinks)
 
     Routing, views, SQL (Sequelize), sessions, Membership activation, and SMTP.
-3. Simple SaaS - Coming Soon
+3. [Simple SaaS](https://github.com/jeremyaboyd/simplemvcjs/tree/master/examples/simplesaas)
 
-    Planned example using Membership, Stripe Checkout, and subscriptions.
+    Membership, Stripe Checkout subscriptions (Free / Basic / Pro), cancel rebill, and admin user list.
 
 ## Quick Start
 This quick start assumes atleast a base familiarity with Node.js, NPM, and how to build a website.

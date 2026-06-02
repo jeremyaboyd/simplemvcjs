@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin — Simple SaaS</title>
+    {{>shared/head}}
+</head>
+<body>
+    {{>shared/nav}}
+    <main>
+        <h1>Admin — Users</h1>
+        <p class="muted">Demo maintenance only. Changing a plan here does not sync with Stripe.</p>
+
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Plan</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#model.users}}
+                <tr>
+                    <td>{{id}}</td>
+                    <td>{{email}}</td>
+                    <td>{{plan}}</td>
+                    <td>{{subscriptionStatus}}</td>
+                    <td class="actions">
+                        <form method="post" action="/admin/user/{{id}}/plan" class="inline-form">
+                            <select name="plan">
+                                {{#planOptions}}
+                                <option value="{{key}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                                {{/planOptions}}
+                            </select>
+                            <button type="submit">Set plan</button>
+                        </form>
+                        <form method="post" action="/admin/user/{{id}}/delete" class="inline-form" onsubmit="return confirm('Delete this user?');">
+                            <button type="submit" class="button-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {{/model.users}}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>
